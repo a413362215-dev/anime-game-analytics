@@ -133,7 +133,7 @@ async function onReset() {
 <style scoped>
 .glass-card::after {
   content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
-  background: linear-gradient(165deg, rgba(255,255,255,.95), rgba(255,255,255,.30) 32%, rgba(255,255,255,.06) 58%, rgba(255,255,255,.45));
+  background: linear-gradient(165deg, rgba(255,255,255,.38), rgba(255,255,255,.12) 34%, rgba(255,255,255,.03) 60%, rgba(255,255,255,.18));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude;
 }
@@ -145,7 +145,7 @@ async function onReset() {
   -webkit-backdrop-filter: blur(28px) saturate(180%);
   backdrop-filter: blur(28px) saturate(180%);
   border: 1px solid rgba(255,255,255,.45);
-  box-shadow: 0 24px 60px rgba(2,6,23,.45), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -1px 0 rgba(255,255,255,.15);
+  box-shadow: 0 24px 54px rgba(2,6,23,.38), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(255,255,255,.08);
   color: #fff; animation: pop .28s cubic-bezier(.2,.9,.3,1.2);
 }
 @keyframes pop { from { transform: scale(.94) translateY(10px); opacity: 0 } to { transform: scale(1) translateY(0); opacity: 1 } }

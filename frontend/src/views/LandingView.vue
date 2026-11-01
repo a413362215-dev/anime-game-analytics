@@ -184,28 +184,28 @@ const smallFeatures = [
 .rim {
   border: 1px solid transparent;
   background:
-    linear-gradient(150deg, rgba(255,255,255,.17), rgba(255,255,255,.06) 58%, rgba(255,255,255,.10)) padding-box,
-    linear-gradient(168deg, rgba(255,255,255,.78), rgba(255,255,255,.22) 34%, rgba(255,255,255,.05) 62%, rgba(255,255,255,.34)) border-box;
-  -webkit-backdrop-filter: blur(22px) saturate(165%); backdrop-filter: blur(22px) saturate(165%);
-  box-shadow: 0 18px 44px rgba(2,6,23,.30), inset 0 1px 0 rgba(255,255,255,.42), inset 0 -1px 0 rgba(255,255,255,.06);
+    linear-gradient(150deg, rgba(255,255,255,.10), rgba(255,255,255,.035) 58%, rgba(255,255,255,.06)) padding-box,
+    linear-gradient(168deg, rgba(255,255,255,.34), rgba(255,255,255,.11) 36%, rgba(255,255,255,.03) 64%, rgba(255,255,255,.15)) border-box;
+  -webkit-backdrop-filter: blur(26px) saturate(150%); backdrop-filter: blur(26px) saturate(150%);
+  box-shadow: 0 14px 34px rgba(2,6,23,.18), inset 0 1px 0 rgba(255,255,255,.16), inset 0 -1px 0 rgba(255,255,255,.03);
 }
 /* 鼠标聚光：光斑跟着光标走；边缘光只亮离光标最近的那段轮廓 */
 .spot { position: relative; }
-.spot::before, .spot::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .5s ease; }
-.spot::before { background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,.13), rgba(255,255,255,.04) 42%, transparent 68%); }
+.spot::before, .spot::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .8s ease; }
+.spot::before { background: radial-gradient(480px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,.05), rgba(255,255,255,.018) 45%, transparent 70%); }
 .spot::after { inset: 0; padding: 1px;
-  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,.95), rgba(255,255,255,.25) 45%, transparent 72%);
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,.30), rgba(255,255,255,.10) 48%, transparent 74%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude; }
 @media (hover: hover) and (pointer: fine) {
   .spot:hover::before, .spot:hover::after { opacity: 1; }
   .lift { transition: transform .35s cubic-bezier(.2,.7,.25,1), box-shadow .35s ease; }
-  .lift:hover { transform: translateY(-4px); box-shadow: 0 28px 56px rgba(2,6,23,.42), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -1px 0 rgba(255,255,255,.08); }
+  .lift:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(2,6,23,.26), inset 0 1px 0 rgba(255,255,255,.22), inset 0 -1px 0 rgba(255,255,255,.05); }
 }
 /* 按压反馈：按下时回弹式缩放，光变强一点，松手弹回 */
 .press { transition: transform .18s cubic-bezier(.34,1.56,.64,1), filter .18s ease; }
-.press:active { transform: scale(.96); filter: brightness(1.14); }
-.press-soft:active { transform: translateY(-4px) scale(.985); }
+.press:active { transform: scale(.965); filter: brightness(1.07); }
+.press-soft:active { transform: translateY(-2px) scale(.99); }
 
 .nav { position: relative; z-index: 5; margin: 20px auto 0; max-width: 1180px; border-radius: 24px;
   display: flex; align-items: center; justify-content: space-between; padding: 13px 22px; }
@@ -249,21 +249,21 @@ const smallFeatures = [
 .story-img { border-radius: 26px; padding: 10px; overflow: hidden; min-height: 302px; }
 .story-img img { display: block; width: 100%; height: 100%; min-height: 282px; object-fit: cover; border-radius: 18px; }
 .story-text { border-radius: 26px; padding: 36px 34px; display: flex; flex-direction: column; justify-content: center; }
-.story-text h3 { margin: 0 0 14px; font-size: 25px; font-weight: 800; }
+.story-text h3 { margin: 0 0 14px; font-size: 25px; font-weight: 800; text-shadow: 0 1px 14px rgba(2,6,23,.30); }
 .story-text p { margin: 0 0 22px; font-size: 15px; line-height: 1.85; color: rgba(255,255,255,.84); }
 .tag-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .tag-row span { padding: 7px 14px; border-radius: 999px; font-size: 12.5px; color: rgba(255,255,255,.9);
-  background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.26); box-shadow: inset 0 1px 0 rgba(255,255,255,.35); }
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.16); box-shadow: inset 0 1px 0 rgba(255,255,255,.18); }
 
 .feature-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; }
 .feature-card { border-radius: 26px; padding: 30px; overflow: hidden; }
 .big-card { grid-column: span 6; min-height: 252px; }
 .small-card { grid-column: span 3; }
 .f-orb { width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(150deg, rgba(255,255,255,.28), rgba(255,255,255,.10));
-  border: 1px solid rgba(255,255,255,.38); box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 8px 18px rgba(2,6,23,.25); }
+  background: linear-gradient(150deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+  border: 1px solid rgba(255,255,255,.22); box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 18px rgba(2,6,23,.18); }
 .f-orb svg { width: 24px; height: 24px; color: #DDD6FE; }
-.feature-card h3 { margin: 18px 0 9px; font-size: 18.5px; font-weight: 700; }
+.feature-card h3 { margin: 18px 0 9px; font-size: 18.5px; font-weight: 700; text-shadow: 0 1px 12px rgba(2,6,23,.28); }
 .small-card h3 { font-size: 16.5px; }
 .feature-card p { margin: 0; color: rgba(255,255,255,.82); font-size: 14px; line-height: 1.72; }
 .mini-chart { width: 100%; height: 58px; margin-top: 22px; opacity: .92; }
