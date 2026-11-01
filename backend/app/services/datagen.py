@@ -104,6 +104,8 @@ def generate(db: Session) -> dict:
         for v in versions:
             for half in (0, 1):
                 bs = v.start_date + timedelta(days=half * 21)
+                if bs > v.end_date:
+                    continue  # 版本不足整 42 天（如数据截止日截断）时不生成越界卡池
                 be = min(bs + timedelta(days=20), v.end_date)
                 b = DimBanner(game_id=gid, version_id=v.id, name=g["banners"][bi % len(g["banners"])],
                               banner_type="character", start_date=bs, end_date=be)
@@ -152,6 +154,8 @@ def generate(db: Session) -> dict:
         gacha_src = sources["uigf"] if g["code"] == "gi" else sources["srgf"]
 
         events, sessions, payments, gachas, feedbacks = [], [], [], [], []
+        pull_seq = 0  # external_id 专用单调计数，不能用 len(列表)：列表会被 _flush 清空
+        pay_seq = 0
         daily = {}
         version_start_set = {v.start_date for v in versions}
         pity = {i: 0 for i in tracked}
@@ -210,9 +214,10 @@ def generate(db: Session) -> dict:
                     pay_u += 1; rev += pay_amt; p["_spend"] += pay_amt
                     payments.append({"game_id": gid, "player_id": p["_id"],
                                      "banner_id": cur_banner.id if tier != "minnow" else None,
-                                     "source_id": sources["simulator"], "external_id": f"sim-{g['code']}-{len(payments)}",
+                                     "source_id": sources["simulator"], "external_id": f"sim-{g['code']}-{pay_seq}",
                                      "amount": pay_amt, "product": prod,
                                      "paid_at": datetime.combine(d, dtime(gr.randint(8, 23), gr.randint(0, 59))), "pay_date": d})
+                    pay_seq += 1
                 # ---- 抽卡（仅被追踪玩家逐条记） ----
                 if pi in tracked:
                     pull_p = {"free": .05, "minnow": .10, "dolphin": .30, "whale": .55}[tier]
@@ -234,9 +239,10 @@ def generate(db: Session) -> dict:
                                 rarity, it = 3, item3
                             gachas.append({"game_id": gid, "player_id": p["_id"], "banner_id": cur_banner.id,
                                            "item_id": it.id, "source_id": gacha_src,
-                                           "external_id": f"{g['code']}-{p['_id']}-{len(gachas)}",
+                                           "external_id": f"{g['code']}-{p['_id']}-{pull_seq}",
                                            "banner_type": "character", "rarity": rarity, "pity_count": pc,
                                            "pulled_at": datetime.combine(d, dtime(gr.randint(8, 23), gr.randint(0, 59))), "pull_date": d})
+                            pull_seq += 1
             daily[d] = {"game_id": gid, "metric_date": d, "dau": dau, "new_users": new_u,
                         "revenue": round(rev, 2), "pay_users": pay_u, "sessions": dau}
             # ---- 反馈：版本首周量大；优化卡顿在版本首日有负面尖峰 ----
