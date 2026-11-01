@@ -1,0 +1,41 @@
+/* 应用内页主题：与主页同一套深空玻璃语言 */
+.app-shell { min-height: 100vh; color: #EEF0FF; font-family: 'Plus Jakarta Sans', 'Noto Sans SC', system-ui, sans-serif;
+  background:
+    radial-gradient(900px 480px at 85% -5%, rgba(37,99,235,.28), transparent 60%),
+    radial-gradient(800px 520px at -10% 100%, rgba(124,58,237,.24), transparent 60%),
+    linear-gradient(160deg, #0A0E27 0%, #0D1233 55%, #120B2E 100%);
+  background-attachment: fixed; }
+.panel { background: linear-gradient(150deg, rgba(255,255,255,.09), rgba(255,255,255,.045));
+  border: 1px solid rgba(255,255,255,.14); border-radius: 20px;
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  box-shadow: 0 14px 34px rgba(2,6,23,.25), inset 0 1px 0 rgba(255,255,255,.14); padding: 20px 22px; }
+.p-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.p-title { font-size: 15.5px; font-weight: 700; margin: 0; }
+.p-sub { font-size: 12.5px; color: rgba(238,240,255,.55); }
+.page-head { margin: 2px 0 20px; }
+.page-title { font-size: 25px; font-weight: 800; margin: 0 0 6px; }
+.page-sub { font-size: 13.5px; color: rgba(238,240,255,.62); margin: 0; }
+.kpi-label { font-size: 13px; color: rgba(238,240,255,.62); margin: 0 0 8px; }
+.kpi-num { font-size: 30px; font-weight: 800; line-height: 1.05; margin: 0; font-variant-numeric: tabular-nums; }
+.kpi-foot { font-size: 12.5px; margin: 9px 0 0; color: rgba(238,240,255,.55); }
+.up { color: #34D399; font-weight: 700; } .down { color: #F87171; font-weight: 700; }
+.grid { display: grid; gap: 18px; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.tbl th { text-align: left; font-size: 12px; font-weight: 600; color: rgba(238,240,255,.5); padding: 6px 10px 10px; white-space: nowrap; }
+.tbl td { padding: 11px 10px; border-top: 1px solid rgba(255,255,255,.08); vertical-align: middle; }
+.tbl tr:hover td { background: rgba(255,255,255,.03); }
+.badge { display: inline-block; padding: 2.5px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.b-red { background: rgba(248,113,113,.16); color: #FCA5A5; } .b-amber { background: rgba(251,191,36,.16); color: #FCD34D; }
+.b-green { background: rgba(52,211,153,.16); color: #6EE7B7; } .b-blue { background: rgba(96,165,250,.16); color: #93C5FD; }
+.b-purple { background: rgba(192,132,252,.16); color: #D8B4FE; } .b-gray { background: rgba(255,255,255,.1); color: rgba(238,240,255,.75); }
+.bar-track { height: 6px; border-radius: 99px; background: rgba(255,255,255,.1); overflow: hidden; min-width: 70px; }
+.bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #60A5FA, #818CF8, #E879F9); }
+.btn-p { border: none; cursor: pointer; color: #fff; font-weight: 700; font-size: 13.5px; font-family: inherit;
+  padding: 9px 18px; border-radius: 999px; background: linear-gradient(135deg, #60A5FA, #818CF8 55%, #E879F9);
+  box-shadow: 0 8px 20px rgba(99,102,241,.4), inset 0 1px 0 rgba(255,255,255,.5); }
+.btn-g { border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.08); color: #fff; cursor: pointer;
+  font-size: 13.5px; font-weight: 600; font-family: inherit; padding: 8px 16px; border-radius: 999px; transition: all .25s ease; }
+.btn-g:hover { background: linear-gradient(135deg, #60A5FA, #818CF8 55%, #E879F9); border-color: transparent; box-shadow: 0 8px 20px rgba(99,102,241,.45); }
+.chip-tag { display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: 12.5px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: rgba(238,240,255,.85); }
+.demo-badge { display: inline-block; padding: 3px 11px; border-radius: 999px; font-size: 12px; font-weight: 600; background: rgba(251,191,36,.15); color: #FCD34D; border: 1px solid rgba(251,191,36,.35); }
+::-webkit-scrollbar { width: 9px; height: 9px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 99px; }
