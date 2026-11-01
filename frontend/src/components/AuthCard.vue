@@ -5,7 +5,7 @@
     <!-- 密码登录 -->
     <div v-if="mode === 'password'">
       <h2 class="card-title">欢迎回来</h2>
-      <p class="card-sub">登录二次元游戏玩家行为分析系统</p>
+      <p class="card-sub">欢迎回来，今天也一起看看他们吧</p>
       <div class="field"><el-input v-model="form.username" placeholder="账号" size="large" class="glass-input" /></div>
       <div class="field"><el-input v-model="form.password" type="password" placeholder="密码" size="large" show-password class="glass-input" @keyup.enter="onLogin" /></div>
       <button class="primary-btn" :disabled="loading" @click="onLogin">{{ loading ? '登录中…' : '登 录' }}</button>
@@ -36,7 +36,7 @@
     <!-- 注册 -->
     <div v-else-if="mode === 'register'">
       <h2 class="card-title">注册账号</h2>
-      <p class="card-sub">注册后自动登录进入系统</p>
+      <p class="card-sub">注册完成，即刻启程</p>
       <div class="field"><el-input v-model="form.username" placeholder="账号" size="large" class="glass-input" /></div>
       <div class="field"><el-input v-model="form.phone" placeholder="手机号" size="large" class="glass-input" /></div>
       <div class="field code-row">

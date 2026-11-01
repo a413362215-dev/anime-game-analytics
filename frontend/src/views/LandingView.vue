@@ -8,7 +8,7 @@
         <span>二次元游戏 · 玩家行为分析</span>
       </div>
       <nav class="nav-links">
-        <a href="#features">能做什么</a><a href="#players">玩家的一天</a><a href="#features">智能问答</a>
+        <a href="#features">能做什么</a><a href="#players">玩家的一程</a><a href="#features">智能问答</a>
       </nav>
       <div class="nav-actions">
         <template v-if="loggedIn">
@@ -24,52 +24,52 @@
     <main class="hero">
       <div class="hero-text">
         <p class="eyebrow">PLAYER ANALYTICS FOR ANIME GAMES</p>
-        <h1>看懂玩家，<br/><span class="grad">读懂版本。</span></h1>
-        <p class="hero-sub">谁在玩、玩得开不开心、为什么不玩了——<br/>这个系统帮你把这些问题，一次看清楚。</p>
+        <h1>与玩家相逢，<br/><span class="grad">读懂这一程。</span></h1>
+        <p class="hero-sub">初来乍到的新面孔、夜夜赴约的老朋友、悄然离站的身影——<br/>他们为何而来，为何停留，又为何离开。答案，都藏在这一程里。</p>
         <div class="hero-cta">
           <button class="btn-solid big" @click="loggedIn ? router.push('/dashboard') : openAuth('password')">{{ loggedIn ? '进入系统' : '立即登录' }}</button>
           <button class="btn-ghost big" @click="openAuth('register')">注册账号</button>
         </div>
         <div class="hero-stats">
-          <div><b>10</b><span>个页面，一站看全</span></div>
-          <div><b>6</b><span>样本事，件件实用</span></div>
+          <div><b>10</b><span>个页面，一程看完</span></div>
+          <div><b>6</b><span>个模块，各守一站</span></div>
           <div><b>2</b><span>款游戏能接：原神 · 崩铁</span></div>
-          <div><b>1</b><span>个助手，有事直接问</span></div>
+          <div><b>1</b><span>个助手，随问随答</span></div>
         </div>
       </div>
       <div class="hero-visual">
         <div class="hero-frame glass-lite">
           <img src="/img/play-1.jpg" alt="玩家的游戏房间" />
         </div>
-        <span class="chip chip-1 glass-lite">谁是氪金大佬，一眼分清</span>
-        <span class="chip chip-2 glass-lite">新版本口碑，自动汇总</span>
-        <span class="chip chip-3 glass-lite">抽卡花了多少，有本账</span>
+        <span class="chip chip-1 glass-lite">谁在为爱一掷千金</span>
+        <span class="chip chip-2 glass-lite">新版本的心声，替你收好</span>
+        <span class="chip chip-3 glass-lite">每一抽，都记在账上</span>
       </div>
     </main>
 
     <section id="players" class="showcase">
-      <p class="eyebrow center">PLAYERS · 玩家的一天</p>
-      <h2 class="section-title">玩家真实的样子</h2>
+      <p class="eyebrow center">PLAYERS · 玩家的一程</p>
+      <h2 class="section-title">旅途中的人们</h2>
       <div class="show-grid">
         <figure class="show-card glass-lite">
           <img src="/img/stage.jpg" alt="一起开黑的玩家" />
-          <figcaption><b>一起玩，才热闹</b><span>组队、开黑、打联机——好不好玩，先看愿不愿意拉朋友。</span></figcaption>
+          <figcaption><b>愿同行的人，一直在身边</b><span>组队、开黑、攻坚。朋友还在，故事就不会落幕；朋友离开，往往也不是一个人离开。</span></figcaption>
         </figure>
         <figure class="show-card glass-lite">
           <img src="/img/play-2.jpg" alt="认真打游戏的手" />
-          <figcaption><b>认真玩的人最较真</b><span>操作、数值、平衡性，他们比谁都敏感，也最愿意说真话。</span></figcaption>
+          <figcaption><b>愿真心话，有处可说</b><span>数值、手感、平衡——他们在意的，比谁都多；想说的话，也比谁都真。新版本往哪走，先听听他们的。</span></figcaption>
         </figure>
         <figure class="show-card glass-lite">
           <img src="/img/play-3.jpg" alt="晚上的游戏房间" />
-          <figcaption><b>每天晚上准时上线</b><span>下班下课后的两小时，是他们和游戏世界约好的时间。</span></figcaption>
+          <figcaption><b>愿每一晚，都有人赴约</b><span>放学、下班，屏幕一盏盏亮起。这是他们与这个世界定下的约定，日日如此，风雨无阻。</span></figcaption>
         </figure>
       </div>
     </section>
 
     <section id="features" class="features">
-      <p class="eyebrow center">FEATURES · 能做什么</p>
-      <h2 class="section-title big">不用懂术语，也能看懂玩家</h2>
-      <p class="section-summary">从玩家打开游戏的第一分钟，到他想卸载的那一刻——人数、分类、流失、抽卡、口碑、答疑，六个模块全程替你盯着。每个模块具体能干什么，下面一条一条写清楚了，点卡片下方的入口就能直接进去用。</p>
+      <p class="eyebrow center">FEATURES · 沿途六站</p>
+      <h2 class="section-title big">答案，都在这一程里</h2>
+      <p class="section-summary">一段旅途，总要有人记录。谁在清晨抵达，谁在深夜离开；谁为心仪的角色攒了很久的原石，谁又在评论里留下长长的一段话。六个模块守在沿途的每一站，把这些都替你记下来——想看的时候，翻开便是。</p>
       <div class="feature-grid">
         <div v-for="f in modules" :key="f.title" class="feature-card glass-lite">
           <svg viewBox="0 0 24 24" class="f-icon" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" v-html="f.icon"></svg>
@@ -85,12 +85,12 @@
         </div>
       </div>
       <div class="summary-bar glass-lite">
-        <b>一句话总结</b><span>玩家从哪来、为什么留下、为什么离开、钱花在哪——答案都在上面这六个模块里。</span>
+        <b>写在最后</b><span>愿每一位玩家的来与去，都被认真记得。</span>
       </div>
     </section>
 
     <footer class="foot">
-      基于 Python + Vue 构建 · 数据可以是你自己的：游戏里导出的抽卡记录、玩家评论，都能接进来<br/>
+      数据可以是你自己的：游戏里导出的抽卡记录、留在评论区的心里话，都能在此安放。<br/>
       <span class="credits">主页照片来自 Unsplash 摄影师 Ella Don、Anthony Brolin、Axville（免费图库）</span>
     </footer>
 
@@ -122,18 +122,18 @@ const P = {
   spark: '<path d="M12 3.5 13.8 8.7 19 10.5l-5.2 1.8L12 17.5l-1.8-5.2L5 10.5l5.2-1.8L12 3.5Z"/><path d="M18.8 16.2l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7.7-1.9Z"/>'
 }
 const modules = [
-  { icon: P.chart, path: '/dashboard', title: '总览看板', desc: '今天的游戏，活得好不好',
-    points: ['今天来了多少人，新玩家和老玩家各占多少', '今天一共收了多少钱', '最近哪天人最多、哪天最少', '和昨天、上周比，是涨还是跌'] },
-  { icon: P.users, path: '/segment', title: '玩家分群', desc: '把玩家分好组，对谁说什么话',
-    points: ['氪金大佬都有谁', '月卡党、肝帝、剧情党各有多少人', '每一组人最喜欢什么、最烦什么', '哪一组人最近不活跃了'] },
-  { icon: P.bell, path: '/churn', title: '流失预警', desc: '谁要走，提前拦',
-    points: ['谁最近上线越来越少', '他想走的原因是什么', '先救哪一批人最划算', '最后救回来了多少人'] },
-  { icon: P.gem, path: '/gacha', title: '付费与抽卡', desc: '钱和卡池，都算清',
-    points: ['哪个卡池卖得最好', '平均多少抽出一个金', '保底歪了多少次', '大佬们都在为谁花钱'] },
-  { icon: P.chat, path: '/feedback', title: '版本反馈', desc: '新版本，玩家买不买账',
-    points: ['被夸得最多的是哪一点', '被骂得最惨的是哪一点', '玩家最想要的新东西是什么', '和上一个版本比，口碑变好了吗'] },
-  { icon: P.spark, path: '/chat', title: '智能助手', desc: '不想翻报表，就直接问',
-    points: ['打字问一句，数字马上来', '让它把新版本总结成一段话', '查某个玩家最近在干什么', '每个回答都标出处，不瞎编'] },
+  { icon: P.chart, path: '/dashboard', title: '总览看板', desc: '今日的世界，热闹依旧吗',
+    points: ['今天有多少新面孔抵达', '老朋友回来了多少', '今天的流水有多少', '哪天最热闹，哪天最安静'] },
+  { icon: P.users, path: '/segment', title: '玩家分群', desc: '众生百态，各有归处',
+    points: ['一掷千金的大佬，名单在此', '月卡党、肝帝、剧情党，各有多少人', '每一组人，心头好各不相同', '哪一组人，最近来得少了'] },
+  { icon: P.bell, path: '/churn', title: '流失预警', desc: '在离站之前，先留住他',
+    points: ['谁的脚步，正在变慢', '他想离开的理由，写在数据里', '先留哪一批，最值得', '挽留之后，又回来了多少人'] },
+  { icon: P.gem, path: '/gacha', title: '付费与抽卡', desc: '每一抽，都算数',
+    points: ['哪个卡池，最受欢迎', '平均多少抽，迎来金光', '保底歪掉的次数，也记得清', '大佬们的心头好，是哪一位'] },
+  { icon: P.chat, path: '/feedback', title: '版本反馈', desc: '这一程，风评如何',
+    points: ['夸得最多的，是哪一处', '骂得最凶的，又是哪一处', '大家最盼着的更新是什么', '比起上一程，口碑回暖了吗'] },
+  { icon: P.spark, path: '/chat', title: '智能助手', desc: '有事，问它便好',
+    points: ['打字问一句，答案就来', '把新版本，总结成一段话', '某位玩家近况，随口可查', '句句有出处，不编造'] },
 ]
 function openEntry(path: string) {
   if (localStorage.getItem('token')) { router.push(path); return }
