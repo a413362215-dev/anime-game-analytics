@@ -172,7 +172,7 @@ function openEntry(path: string) {
 .nav-links a:hover { background: linear-gradient(135deg, #60A5FA, #818CF8 55%, #E879F9); color: #fff; box-shadow: 0 8px 22px rgba(99,102,241,.45), inset 0 1px 0 rgba(255,255,255,.5); }
 .nav-actions { display: flex; gap: 10px; }
 .btn-ghost { border: 1px solid rgba(255,255,255,.45); background: rgba(255,255,255,.12); color: #fff;
-  padding: 9px 22px; border-radius: 999px; cursor: pointer; font-size: 14.5px; font-family: inherit; transition: all .25s ease; }
+  padding: 9px 22px; border-radius: 999px; cursor: pointer; font-size: 14.5px; font-weight: 700; font-family: inherit; transition: all .25s ease; }
 .btn-ghost:hover, .btn-solid:hover { background: linear-gradient(135deg, #60A5FA, #818CF8 55%, #E879F9); border-color: transparent; box-shadow: 0 10px 26px rgba(99,102,241,.5), inset 0 1px 0 rgba(255,255,255,.5); }
 .btn-solid { border: 1px solid rgba(255,255,255,.45); color: #fff; padding: 9px 22px; border-radius: 999px; cursor: pointer; font-size: 14.5px; font-weight: 700; font-family: inherit;
   background: rgba(255,255,255,.12); box-shadow: none; transition: all .25s ease; }
