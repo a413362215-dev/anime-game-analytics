@@ -8,7 +8,7 @@
         <span>二次元游戏 · 玩家行为分析</span>
       </div>
       <nav class="nav-links">
-        <a href="#features">能做什么</a><a href="#players">玩家的一程</a><a href="#features">智能问答</a>
+        <a href="#features">基础功能</a><a href="#players">玩家行为总览</a><a href="#features">智能问答</a>
       </nav>
       <div class="nav-actions">
         <template v-if="loggedIn">
@@ -48,7 +48,7 @@
     </main>
 
     <section id="players" class="showcase">
-      <p class="eyebrow center">PLAYERS · 玩家的一程</p>
+      <p class="eyebrow center">PLAYERS · 玩家行为总览</p>
       <h2 class="section-title">旅途中的人们</h2>
       <div class="show-grid">
         <figure class="show-card glass-lite">
