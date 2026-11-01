@@ -163,7 +163,7 @@ function openEntry(path: string) {
   border: 1px solid rgba(255,255,255,.32);
   box-shadow: 0 12px 32px rgba(2,6,23,.28), inset 0 1px 0 rgba(255,255,255,.5);
 }
-.nav { position: fixed; top: 13px; left: 50%; transform: translateX(-50%); max-width: 1180px; width: calc(100% - 40px); border-radius: 999px; margin: 0;
+.nav { position: fixed; z-index: 200; isolation: isolate; top: 13px; left: 50%; transform: translateX(-50%); max-width: 1180px; width: calc(100% - 40px); border-radius: 999px; margin: 0;
   display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
 .logo { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 16px; letter-spacing: .04em; }
 .logo-mark { width: 22px; height: 22px; }

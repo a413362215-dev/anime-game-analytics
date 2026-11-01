@@ -63,7 +63,7 @@ const game = ref('gi')
 function onLogout() { user.logout(); router.push('/') }
 </script>
 <style scoped>
-.app-nav { display: flex; align-items: center; gap: 14px; width: min(1440px, calc(100% - 36px)); margin: 13px auto 0; padding: 8px 10px 8px 18px; }
+.app-nav { position: sticky; z-index: 200; isolation: isolate; display: flex; align-items: center; gap: 14px; width: min(1440px, calc(100% - 36px)); margin: 13px auto 0; padding: 8px 10px 8px 18px; }
 .brand { display: flex; align-items: center; gap: 9px; color: #fff; text-decoration: none; flex: 0 0 auto; }
 .brand-mark { width: 24px; height: 24px; color: #A5B4FC; }
 .brand-name { font-size: 14.5px; font-weight: 800; letter-spacing: .03em; white-space: nowrap; }
