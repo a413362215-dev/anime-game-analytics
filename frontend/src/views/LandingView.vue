@@ -49,7 +49,7 @@
 
     <section id="players" class="showcase">
       <p class="eyebrow center">PLAYERS · 玩家行为总览</p>
-      <h2 class="section-title">旅途中的人们</h2>
+      <h2 class="section-title">玩家的日常生活</h2>
       <div class="show-grid">
         <figure class="show-card glass-lite">
           <img src="/img/stage.jpg" alt="一起开黑的玩家" />
@@ -68,7 +68,7 @@
 
     <section id="features" class="features">
       <p class="eyebrow center">FEATURES · 沿途六站</p>
-      <h2 class="section-title big">答案，都在这一程里</h2>
+      <h2 class="section-title big">玩家的保姆模块</h2>
       <p class="section-summary">一段旅途，总要有人记录。谁在清晨抵达，谁在深夜离开；谁为心仪的角色攒了很久的原石，谁又在评论里留下长长的一段话。六个模块守在沿途的每一站，把这些都替你记下来——想看的时候，翻开便是。</p>
       <div class="feature-grid">
         <div v-for="f in modules" :key="f.title" class="feature-card glass-lite">
