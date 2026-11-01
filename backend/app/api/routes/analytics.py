@@ -86,3 +86,86 @@ def overview(game: str = Query("gi"), db: Session = Depends(get_db)):
                      "text": f"最新注册队列次日留存 {d1_latest.d1 * 100:.1f}%，较上期 {d:+g}pt", "time": "昨天"})
     return {"game": game, "kpis": kpis, "trend": trend, "banner_top": banner_top,
             "mix": mix, "retention": retention, "feed": feed, "as_of": str(today.metric_date)}
+
+
+STEP_NAMES = ["首次启动", "创建角色", "完成序章引导", "通关第 4 关", "完成首抽", "进入主线章节"]
+CHANNEL_LABEL = {"official": "官方渠道", "bilibili": "Bilibili", "taptap": "TapTap", "ios": "应用商店", "import": "导入"}
+
+
+@router.get("/analytics/funnel")
+def funnel(game: str = Query("gi"), days: int = Query(30), db: Session = Depends(get_db)):
+    """新手漏斗：窗口内注册的新玩家，各教程步的到达人数（fact_event_log 口径）。
+    渠道次日回访为被追踪样本口径（fact_session），已在返回里标注样本量。"""
+    import json as _json
+    from ...models.core import FactEventLog, FactSession
+    g = _game(db, game)
+    if not g:
+        return {"error": "game not found"}
+    end = db.query(func.max(FactDailyMetric.metric_date)).filter(FactDailyMetric.game_id == g.id).scalar()
+
+    def window_steps(win_start, win_end):
+        pids = [pid for (pid,) in db.query(DimPlayer.id).filter(
+            DimPlayer.game_id == g.id, DimPlayer.register_date >= win_start,
+            DimPlayer.register_date <= win_end).all()]
+        counts = {i: 0 for i in range(1, 7)}
+        if pids:
+            rows = (db.query(FactEventLog.props, func.count(func.distinct(FactEventLog.player_id)))
+                    .filter(FactEventLog.event_name == "tutorial_step",
+                            FactEventLog.player_id.in_(pids)).group_by(FactEventLog.props).all())
+            for props, c in rows:
+                counts[_json.loads(props)["step"]] = c
+        return [counts[i] for i in range(1, 7)], len(pids)
+
+    start = end - timedelta(days=days - 1)
+    vals, n_new = window_steps(start, end)
+    steps = []
+    for i, v in enumerate(vals):
+        steps.append({"name": STEP_NAMES[i], "count": v,
+                      "pct": round(v / vals[0] * 100, 1) if vals[0] else 0,
+                      "conv": round(vals[i + 1] / v * 100, 1) if i < 5 and v else None,
+                      "drop": (v - vals[i + 1]) if i < 5 else 0})
+    drops = [(steps[i]["drop"], i) for i in range(5)]
+    bd = max(drops) if drops else (0, 0)
+    biggest = {"from": STEP_NAMES[bd[1]], "to": STEP_NAMES[bd[1] + 1], "count": bd[0],
+               "share": round(bd[0] / vals[0] * 100, 1) if vals[0] else 0}
+    prev_vals, _ = window_steps(end - timedelta(days=2 * days - 1), start - timedelta(days=1))
+    conv_now = round(vals[5] / vals[0] * 100, 1) if vals[0] else 0
+    conv_prev = round(prev_vals[5] / prev_vals[0] * 100, 1) if prev_vals[0] else 0
+
+    # 渠道：新增（全量）/ 引导完成率（全量）/ 次日回访（被追踪样本）
+    channels = []
+    chan_rows = db.query(DimPlayer.channel, func.count(DimPlayer.id)).filter(
+        DimPlayer.game_id == g.id, DimPlayer.register_date >= start).group_by(DimPlayer.channel).all()
+    for ch, cnt in sorted(chan_rows, key=lambda x: -x[1]):
+        if ch == "import":
+            continue
+        pids = [pid for (pid,) in db.query(DimPlayer.id).filter(
+            DimPlayer.game_id == g.id, DimPlayer.channel == ch, DimPlayer.register_date >= start).all()]
+        reached = {1: 0, 6: 0}
+        if pids:
+            for props, c in (db.query(FactEventLog.props, func.count(func.distinct(FactEventLog.player_id)))
+                             .filter(FactEventLog.event_name == "tutorial_step",
+                                     FactEventLog.player_id.in_(pids)).group_by(FactEventLog.props).all()):
+                step = _json.loads(props)["step"]
+                if step in reached:
+                    reached[step] = c
+        # 次日回访用全期被追踪样本（30 日窗口每渠道仅 10~20 人，噪声太大）；
+        # 在 Python 侧算：SQLite 里 date 列 + timedelta 的 SQL 表达式不可靠（实测恒为 0）
+        all_pids = [pid for (pid,) in db.query(DimPlayer.id).filter(
+            DimPlayer.game_id == g.id, DimPlayer.channel == ch).all()]
+        reg_map = dict(db.query(DimPlayer.id, DimPlayer.register_date).filter(
+            DimPlayer.id.in_(all_pids)).all())
+        sess = {}
+        for pid2, sd in db.query(FactSession.player_id, FactSession.session_date).filter(
+                FactSession.player_id.in_(all_pids)).all():
+            sess.setdefault(pid2, set()).add(sd)
+        tracked = len(sess)
+        d1_back = sum(1 for pid2, rd in reg_map.items()
+                      if pid2 in sess and rd + timedelta(days=1) in sess[pid2])
+        channels.append({"name": CHANNEL_LABEL.get(ch, ch), "new": cnt,
+                         "completion": round(reached[6] / reached[1] * 100, 1) if reached[1] else 0,
+                         "d1_sample": round(d1_back / tracked * 100, 1) if tracked else None,
+                         "tracked": tracked})
+    return {"game": game, "days": days, "new_players": n_new, "steps": steps,
+            "biggest_drop": biggest, "channels": channels,
+            "compare": {"now": conv_now, "prev": conv_prev, "delta_pt": round(conv_now - conv_prev, 1)}}

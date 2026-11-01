@@ -286,17 +286,6 @@ def generate(db: Session) -> dict:
                          "d1": rate(1), "d7": rate(7), "d30": rate(30)})
         _flush(db, FactRetentionCohort, rows)
 
-        # ---- 特征快照（run_date = 数据截止日） ----
-        snaps = []
-        for p in players:
-            a30 = [d for d in p["_active_days"] if (END - d).days <= 30]
-            snaps.append({"game_id": gid, "player_id": p["_id"], "run_date": END,
-                          "recency_days": (END - p["last_active_date"]).days if p["last_active_date"] else 999,
-                          "frequency_30d": len(a30), "monetary_30d": 0.0,
-                          "avg_session_min": round(sum(p["_sess"]) / len(p["_sess"]), 1) if p["_sess"] else 0,
-                          "level": p["level"], "gacha_pulls_30d": p["_pulls30"]})
-        _flush(db, PlayerFeatureSnapshot, snaps)
-
         # ---- 来源计数回写 + 同步任务留痕 ----
         counts = {
             "uigf": db.query(FactGacha).filter(FactGacha.game_id == gid, FactGacha.source_id == sources["uigf"]).count() if g["code"] == "gi" else None,
@@ -318,4 +307,8 @@ def generate(db: Session) -> dict:
                         added_rows=sum(summary[g["code"]].values()), skipped_rows=0, status="success",
                         detail="seed=20261101 确定性生成"))
     db.commit()
+    # 特征快照不由生成器内联拼凑，统一走 ETL 作业从事实表重算（阶段 3）
+    from .etl import run_feature_snapshot
+    snap = run_feature_snapshot(db, END)
+    summary["snapshot"] = snap
     return summary

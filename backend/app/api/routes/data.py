@@ -39,3 +39,14 @@ async def ingest_gacha(file: UploadFile = File(...), game: str = Form("gi")):
     except (ValueError, UnicodeDecodeError):
         return {"error": "文件不是合法的 JSON（UIGF/SRGF 导出文件应为 JSON 格式）"}
     return UigfDataSource().import_payload(payload, game)
+
+
+@router.post("/etl/snapshot")
+def etl_snapshot(db: Session = Depends(get_db)):
+    """手动触发特征快照 ETL（从事实表重算，幂等）。"""
+    from ...models.core import FactDailyMetric
+    from ...services.etl import run_feature_snapshot
+    end = db.query(FactDailyMetric.metric_date).order_by(FactDailyMetric.metric_date.desc()).first()
+    if not end:
+        return {"error": "no data"}
+    return run_feature_snapshot(db, end[0])
