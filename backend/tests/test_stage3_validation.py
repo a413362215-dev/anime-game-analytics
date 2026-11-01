@@ -7,7 +7,6 @@ import os, sys
 from datetime import timedelta
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from tests.test_data_quality import db  # noqa: F401,F403  复用测试库夹具
 from sqlalchemy import func  # noqa: E402
 from app.models.core import (DimPlayer, FactSession, PlayerFeatureSnapshot)  # noqa: E402
 from app.services.datagen import END  # noqa: E402

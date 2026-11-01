@@ -17,13 +17,10 @@ import sys
 from datetime import date, timedelta
 
 import pytest
-from sqlalchemy import create_engine, func, inspect
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import func, inspect
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from app.db.session import Base  # noqa: E402
-from app.models.user import SysUser  # noqa: E402,F401
 from app.models.core import (DataSource, SyncTask, DimGame, DimVersion, DimBanner, DimItem,  # noqa: E402
                              DimPlayer, FactEventLog, FactSession, FactPayment, FactGacha,
                              FactFeedback, FactDailyMetric, FactRetentionCohort,
@@ -34,18 +31,6 @@ EXPECTED_TABLES = {"sys_user", "data_source", "sync_task", "dim_game", "dim_vers
                    "dim_banner", "dim_item", "dim_player", "fact_event_log", "fact_session",
                    "fact_payment", "fact_gacha", "fact_feedback", "fact_daily_metric",
                    "fact_retention_cohort", "player_feature_snapshot"}
-
-
-@pytest.fixture(scope="module")
-def db(tmp_path_factory):
-    path = tmp_path_factory.mktemp("dq") / "test.db"
-    engine = create_engine(f"sqlite:///{path}")
-    Base.metadata.create_all(bind=engine)
-    session = sessionmaker(bind=engine)()
-    result = generate(session)
-    assert not result.get("skipped"), "测试库生成失败"
-    yield session
-    session.close()
 
 
 def games(db):

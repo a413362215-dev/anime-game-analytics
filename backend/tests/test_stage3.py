@@ -5,7 +5,6 @@ import pytest
 from sqlalchemy import func
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from tests.test_data_quality import db  # noqa: F401  复用 module 级测试库
 from app.models.core import DimPlayer, FactPayment, FactGacha, FactEventLog, PlayerFeatureSnapshot  # noqa: E402
 from app.services.datagen import END  # noqa: E402
 from app.services.etl import run_feature_snapshot, verify_daily_metrics  # noqa: E402

@@ -169,3 +169,62 @@ def funnel(game: str = Query("gi"), days: int = Query(30), db: Session = Depends
     return {"game": game, "days": days, "new_players": n_new, "steps": steps,
             "biggest_drop": biggest, "channels": channels,
             "compare": {"now": conv_now, "prev": conv_prev, "delta_pt": round(conv_now - conv_prev, 1)}}
+
+
+@router.get("/analytics/gacha")
+def gacha(game: str = Query("gi"), db: Session = Depends(get_db)):
+    """付费与抽卡：口径全部来自 fact_gacha / fact_payment。
+    说明：抽卡流水为「导入 + 被追踪样本」口径（与真实来源构成一致）；
+    歪率需要 UP/非 UP 物品标记，本系统物品维度暂无该标记，故第四个 KPI 用深保底占比代替，不编造歪率。"""
+    from ...models.core import FactGacha, DimItem
+    g = _game(db, game)
+    if not g:
+        return {"error": "game not found"}
+    ver = (db.query(DimVersion).filter(DimVersion.game_id == g.id)
+           .order_by(DimVersion.start_date.desc()).first())
+    # 统计口径：全期（180 天）。当前版本仅 12 天、五星样本约 30 个，直方图与均值噪声过大；
+    # 等版本数据攒够再切版本口径。页面文案已按全期标注。
+    win = db.query(FactGacha).filter(FactGacha.game_id == g.id)
+    total = win.count()
+    five_rows = win.filter(FactGacha.rarity == 5).all()
+    five = len(five_rows)
+    pities = sorted(r.pity_count for r in five_rows)
+    avg_pity = round(sum(pities) / five, 1) if five else 0
+    median_pity = pities[five // 2] if five else 0
+    deep_share = round(sum(1 for p in pities if p >= 80) / five * 100, 1) if five else 0
+    buckets = [f"{i * 10 + 1}-{i * 10 + 10}" for i in range(9)]
+    hist = [0] * 9
+    for p in pities:
+        hist[min((p - 1) // 10, 8)] += 1
+    kpis = [
+        {"label": "累计总抽数", "value": f"{total:,}", "note": "近 180 天 · 导入+追踪样本口径"},
+        {"label": "五星出货率", "value": f"{(five / total * 100 if total else 0):.2f}%", "note": "含保底 · 基础 0.6% + 软保底"},
+        {"label": "平均出货抽数", "value": f"{avg_pity} 抽", "note": f"中位数 {median_pity} 抽"},
+        {"label": "深保底占比", "value": f"{deep_share}%", "note": "80 抽之后才出货的五星占比"},
+    ]
+    pool_rows = (db.query(DimBanner.name, func.count(FactGacha.id))
+                 .join(FactGacha, FactGacha.banner_id == DimBanner.id)
+                 .filter(DimBanner.game_id == g.id).group_by(DimBanner.name)
+                 .order_by(func.count(FactGacha.id).desc()).limit(5).all())
+    pools = [{"name": n, "pulls": c} for n, c in pool_rows]
+    top_ids = (db.query(FactGacha.player_id, func.count(FactGacha.id).label("n"))
+               .filter(FactGacha.game_id == g.id).group_by(FactGacha.player_id)
+               .order_by(func.count(FactGacha.id).desc()).limit(5).all())
+    tops = []
+    for pid, pulls in top_ids:
+        p = db.query(DimPlayer).get(pid)
+        spend = db.query(func.coalesce(func.sum(FactPayment.amount), 0)).filter(
+            FactPayment.player_id == pid).scalar()
+        p5 = [r.pity_count for r in db.query(FactGacha).filter(
+            FactGacha.player_id == pid, FactGacha.rarity == 5).all()]
+        fav = (db.query(DimBanner.name, func.count(FactGacha.id))
+               .join(FactGacha, FactGacha.banner_id == DimBanner.id)
+               .filter(FactGacha.player_id == pid).group_by(DimBanner.name)
+               .order_by(func.count(FactGacha.id).desc()).first())
+        tops.append({"name": p.nickname, "uid_tail": p.external_uid[-4:], "pulls": pulls,
+                     "spend": round(spend), "five": len(p5),
+                     "avg_pity": round(sum(p5) / len(p5)) if p5 else 0,
+                     "pool": fav[0] if fav else "—"})
+    return {"game": game, "version": {"code": ver.code, "title": ver.title},
+            "kpis": kpis, "hist": {"buckets": buckets, "counts": hist},
+            "pools": pools, "tops": tops}
