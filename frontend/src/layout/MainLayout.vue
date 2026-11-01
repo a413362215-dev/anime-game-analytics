@@ -1,37 +1,33 @@
 <template>
-  <div class="app-shell shell">
-    <aside class="side panel-flat">
-      <div class="brand">
+  <div class="app-shell">
+    <header class="float-nav app-nav">
+      <RouterLink to="/dashboard" class="brand">
         <svg viewBox="0 0 24 24" class="brand-mark" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3 21 12 12 21 3 12Z"/><path d="M12 8 16 12 12 16 8 12Z"/></svg>
-        <div><b>二次元游戏</b><span>玩家行为分析</span></div>
-      </div>
-      <nav class="menu">
-        <RouterLink v-for="p in pages" :key="p.path" :to="p.path" class="mi" active-class="on">
-          <svg viewBox="0 0 24 24" class="mi-icon" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" v-html="p.icon"></svg>
-          <span>{{ p.title }}</span>
+        <span class="brand-name">玩家行为分析</span>
+      </RouterLink>
+      <nav class="icons">
+        <RouterLink v-for="p in pages" :key="p.path" :to="p.path" class="ni" active-class="on" :title="p.title">
+          <svg viewBox="0 0 24 24" class="ni-icon" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" v-html="p.icon"></svg>
+          <span class="ni-label">{{ p.title }}</span>
         </RouterLink>
       </nav>
-      <div class="side-foot">
-        <div class="user-chip"><span class="avatar">{{ (user.username || 'A').slice(0, 1).toUpperCase() }}</span>
-          <div class="u-meta"><b>{{ user.username }}</b><span>{{ user.role === 'admin' ? '管理员' : '分析师' }}</span></div>
+      <div class="nav-right">
+        <span class="demo-badge">演示数据</span>
+        <div class="game-switch">
+          <button :class="{ on: game === 'gi' }" @click="game = 'gi'">原神</button>
+          <button :class="{ on: game === 'hsr' }" @click="game = 'hsr'">崩铁</button>
         </div>
-        <button class="btn-g logout" @click="onLogout">退出登录</button>
+        <span class="avatar" :title="user.username + '（' + (user.role === 'admin' ? '管理员' : '分析师') + '）'">{{ (user.username || 'A').slice(0, 1).toUpperCase() }}</span>
+        <button class="icon-btn" title="退出登录" @click="onLogout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+        </button>
       </div>
-    </aside>
-    <div class="main">
-      <header class="topbar">
-        <div class="crumb">主页 <i>/</i> {{ $route.meta.title }}</div>
-        <div class="top-right">
-          <span class="demo-badge">演示数据</span>
-          <div class="game-switch">
-            <button :class="{ on: game === 'gi' }" @click="game = 'gi'">原神</button>
-            <button :class="{ on: game === 'hsr' }" @click="game = 'hsr'">星穹铁道</button>
-          </div>
-          <span class="today">2026 年 11 月 1 日 · 版本 5.2</span>
-        </div>
-      </header>
-      <main class="content"><router-view /></main>
+    </header>
+    <div class="meta-row">
+      <span>主页 <i>/</i> {{ $route.meta.title }}</span>
+      <span>2026 年 11 月 1 日 · 版本 5.2</span>
     </div>
+    <main class="content"><router-view /></main>
   </div>
 </template>
 <script setup lang="ts">
@@ -67,36 +63,36 @@ const game = ref('gi')
 function onLogout() { user.logout(); router.push('/') }
 </script>
 <style scoped>
-.shell { display: flex; min-height: 100vh; }
-.side { width: 228px; flex: 0 0 228px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column;
-  padding: 22px 16px 18px; background: linear-gradient(170deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-  border-right: 1px solid rgba(255,255,255,.12); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
-.brand { display: flex; gap: 11px; align-items: center; padding: 2px 8px 20px; }
-.brand-mark { width: 30px; height: 30px; color: #A5B4FC; flex: 0 0 30px; }
-.brand b { display: block; font-size: 16.5px; font-weight: 800; letter-spacing: .02em; }
-.brand span { display: block; font-size: 12px; color: rgba(238,240,255,.55); margin-top: 2px; }
-.menu { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-.mi { display: flex; align-items: center; gap: 11px; padding: 10.5px 13px; border-radius: 13px; color: rgba(238,240,255,.78);
-  text-decoration: none; font-size: 14.5px; font-weight: 500; transition: all .22s ease; }
-.mi-icon { width: 19px; height: 19px; flex: 0 0 19px; opacity: .85; }
-.mi:hover { background: rgba(255,255,255,.07); color: #fff; }
-.mi.on { background: linear-gradient(135deg, #60A5FA, #818CF8 55%, #E879F9); color: #fff; font-weight: 700;
-  box-shadow: 0 8px 20px rgba(99,102,241,.35), inset 0 1px 0 rgba(255,255,255,.45); }
-.mi.on .mi-icon { opacity: 1; }
-.side-foot { border-top: 1px solid rgba(255,255,255,.1); padding-top: 15px; display: flex; flex-direction: column; gap: 12px; }
-.user-chip { display: flex; align-items: center; gap: 10px; padding: 0 6px; }
-.avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 14px; color: #fff;
-  background: linear-gradient(135deg, #60A5FA, #E879F9); }
-.u-meta b { display: block; font-size: 13.5px; } .u-meta span { font-size: 11.5px; color: rgba(238,240,255,.55); }
-.logout { width: 100%; }
-.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 28px 4px; }
-.crumb { font-size: 13px; color: rgba(238,240,255,.55); } .crumb i { font-style: normal; margin: 0 6px; opacity: .6; }
-.top-right { display: flex; align-items: center; gap: 14px; }
+.app-nav { display: flex; align-items: center; gap: 14px; width: min(1440px, calc(100% - 36px)); margin: 13px auto 0; padding: 8px 10px 8px 18px; }
+.brand { display: flex; align-items: center; gap: 9px; color: #fff; text-decoration: none; flex: 0 0 auto; }
+.brand-mark { width: 24px; height: 24px; color: #A5B4FC; }
+.brand-name { font-size: 14.5px; font-weight: 800; letter-spacing: .03em; white-space: nowrap; }
+.icons { display: flex; align-items: center; gap: 2px; margin: 0 auto; }
+.ni { display: flex; align-items: center; border-radius: 999px; padding: 9px 10px; color: rgba(238,240,255,.78); text-decoration: none;
+  transition: background .25s ease, color .25s ease, box-shadow .25s ease; }
+.ni-icon { width: 20px; height: 20px; flex: 0 0 20px; transition: transform .3s cubic-bezier(.34,1.45,.64,1); }
+.ni-label { max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap; font-size: 13.5px; font-weight: 600;
+  transition: max-width .34s cubic-bezier(.34,1.3,.64,1), opacity .22s ease, margin .34s cubic-bezier(.34,1.3,.64,1); }
+.ni:hover { background: rgba(255,255,255,.1); color: #fff; }
+.ni:hover .ni-icon, .ni.on .ni-icon { transform: scale(1.14); }
+.ni:hover .ni-label, .ni.on .ni-label { max-width: 96px; opacity: 1; margin-left: 8px; }
+.ni.on { background: linear-gradient(135deg, #60A5FA, #818CF8 55%, #E879F9); color: #fff;
+  box-shadow: 0 8px 20px rgba(99,102,241,.4), inset 0 1px 0 rgba(255,255,255,.45); }
+.nav-right { display: flex; align-items: center; gap: 11px; flex: 0 0 auto; }
 .game-switch { display: flex; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.13); border-radius: 999px; padding: 3px; }
 .game-switch button { border: none; background: transparent; color: rgba(238,240,255,.7); font-family: inherit; font-size: 12.5px; font-weight: 600;
-  padding: 5px 14px; border-radius: 999px; cursor: pointer; transition: all .22s ease; }
+  padding: 5px 13px; border-radius: 999px; cursor: pointer; transition: all .22s ease; }
 .game-switch button.on { background: linear-gradient(135deg, #60A5FA, #818CF8 55%, #E879F9); color: #fff; }
-.today { font-size: 12.5px; color: rgba(238,240,255,.55); }
-.content { padding: 14px 28px 34px; max-width: 1460px; width: 100%; margin: 0 auto; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 13.5px; color: #fff;
+  background: linear-gradient(135deg, #60A5FA, #E879F9); cursor: default; }
+.icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.08);
+  color: #fff; cursor: pointer; display: grid; place-items: center; transition: all .25s ease; }
+.icon-btn svg { width: 17px; height: 17px; }
+.icon-btn:hover { background: linear-gradient(135deg, #60A5FA, #818CF8 55%, #E879F9); border-color: transparent; }
+.meta-row { display: flex; justify-content: space-between; width: min(1440px, calc(100% - 36px)); margin: 13px auto 0; padding: 0 8px;
+  font-size: 12.5px; color: rgba(238,240,255,.5); }
+.meta-row i { font-style: normal; margin: 0 6px; opacity: .6; }
+.content { padding: 10px 28px 34px; max-width: 1460px; width: 100%; margin: 0 auto; }
+@media (max-width: 1180px) { .brand-name, .demo-badge { display: none; } }
+@media (max-width: 860px) { .game-switch, .meta-row { display: none; } .icons { overflow-x: auto; } }
 </style>

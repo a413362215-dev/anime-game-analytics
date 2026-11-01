@@ -39,3 +39,10 @@
 .chip-tag { display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: 12.5px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: rgba(238,240,255,.85); }
 .demo-badge { display: inline-block; padding: 3px 11px; border-radius: 999px; font-size: 12px; font-weight: 600; background: rgba(251,191,36,.15); color: #FCD34D; border: 1px solid rgba(251,191,36,.35); }
 ::-webkit-scrollbar { width: 9px; height: 9px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 99px; }
+
+/* 悬浮玻璃导航：半透明 + backdrop 高斯模糊/增艳，色调随背后内容实时变化（Liquid Glass 同理） */
+.float-nav { position: sticky; top: 13px; z-index: 80; border-radius: 999px;
+  background: linear-gradient(150deg, rgba(24,28,64,.44), rgba(13,16,40,.36));
+  -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%);
+  border: 1px solid rgba(255,255,255,.22);
+  box-shadow: 0 16px 40px rgba(2,6,23,.38), inset 0 1px 0 rgba(255,255,255,.28); }
