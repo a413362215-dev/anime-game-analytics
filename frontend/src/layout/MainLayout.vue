@@ -32,5 +32,5 @@ const pages = [
   { path: '/data', title: '数据管理' },
 ]
 const user = useUserStore(); const router = useRouter()
-function onLogout() { user.logout(); router.push('/login') }
+function onLogout() { user.logout(); router.push('/') }
 </script>
