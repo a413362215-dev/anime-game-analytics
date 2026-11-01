@@ -100,21 +100,26 @@ async function sendCode() {
     startCountdown()
   } catch (e: any) { err.value = e.response?.data?.detail || '验证码发送失败' }
 }
+function goAfterLogin() {
+  const r = localStorage.getItem('post_login_redirect')
+  localStorage.removeItem('post_login_redirect')
+  router.push(r || '/dashboard')
+}
 async function onLogin() {
   loading.value = true; err.value = ''
-  try { await user.login(form.username, form.password); router.push('/dashboard') }
+  try { await user.login(form.username, form.password); goAfterLogin() }
   catch (e: any) { err.value = e.response?.data?.detail || '登录失败' }
   finally { loading.value = false }
 }
 async function onSmsLogin() {
   loading.value = true; err.value = ''
-  try { await user.smsLogin(form.phone, form.code); router.push('/dashboard') }
+  try { await user.smsLogin(form.phone, form.code); goAfterLogin() }
   catch (e: any) { err.value = e.response?.data?.detail || '登录失败' }
   finally { loading.value = false }
 }
 async function onRegister() {
   loading.value = true; err.value = ''
-  try { await user.register(form.username, form.password, form.phone, form.code); router.push('/dashboard') }
+  try { await user.register(form.username, form.password, form.phone, form.code); goAfterLogin() }
   catch (e: any) { err.value = e.response?.data?.detail || '注册失败' }
   finally { loading.value = false }
 }

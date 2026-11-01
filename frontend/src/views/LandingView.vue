@@ -68,12 +68,24 @@
 
     <section id="features" class="features">
       <p class="eyebrow center">FEATURES · 能做什么</p>
-      <h2 class="section-title">不用懂术语，也能看懂玩家</h2>
+      <h2 class="section-title big">不用懂术语，也能看懂玩家</h2>
+      <p class="section-summary">从玩家打开游戏的第一分钟，到他想卸载的那一刻——人数、分类、流失、抽卡、口碑、答疑，六个模块全程替你盯着。每个模块具体能干什么，下面一条一条写清楚了，点卡片下方的入口就能直接进去用。</p>
       <div class="feature-grid">
-        <div v-for="(f, i) in features" :key="f.title" :class="['feature-card', 'glass-lite', { wide: i === 0 }]">
+        <div v-for="f in modules" :key="f.title" class="feature-card glass-lite">
           <svg viewBox="0 0 24 24" class="f-icon" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" v-html="f.icon"></svg>
-          <h3>{{ f.title }}</h3><p>{{ f.desc }}</p>
+          <h3>{{ f.title }}</h3>
+          <p class="f-desc">{{ f.desc }}</p>
+          <ul class="f-points">
+            <li v-for="pt in f.points" :key="pt">
+              <svg viewBox="0 0 24 24" class="check" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" stroke-opacity=".45"/><path d="M8.5 12.2 11 14.7 15.6 9.6"/></svg>
+              <span>{{ pt }}</span>
+            </li>
+          </ul>
+          <a class="f-entry" @click="openEntry(f.path)">进入{{ f.title }} <span class="arrow">→</span></a>
         </div>
+      </div>
+      <div class="summary-bar glass-lite">
+        <b>一句话总结</b><span>玩家从哪来、为什么留下、为什么离开、钱花在哪——答案都在上面这六个模块里。</span>
       </div>
     </section>
 
@@ -109,14 +121,25 @@ const P = {
   chat: '<path d="M4 4.5h16V16H9.5L4 20.5v-16Z"/><path d="M8 9.5h8"/><path d="M8 13h5"/>',
   spark: '<path d="M12 3.5 13.8 8.7 19 10.5l-5.2 1.8L12 17.5l-1.8-5.2L5 10.5l5.2-1.8L12 3.5Z"/><path d="M18.8 16.2l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7.7-1.9Z"/>'
 }
-const features = [
-  { icon: P.chart, title: '今天有多少人玩', desc: '每天来了多少人、留下来多少、花了多少钱，打开第一页就能看到，不用等报表。' },
-  { icon: P.users, title: '给玩家分分类', desc: '氪金大佬、月卡党、肝帝、剧情党——把玩家分好组，才知道对谁说什么话。' },
-  { icon: P.bell, title: '谁要走了，提前知道', desc: '有人快不玩了，系统会提前提醒你，还会说明他为什么想走、怎么留住他。' },
-  { icon: P.gem, title: '抽卡和花钱，有本账', desc: '每个卡池卖了多少、平均多少抽出货、歪没歪，全都算得清清楚楚。' },
-  { icon: P.chat, title: '新版本，大家怎么说', desc: '玩家评论自动归好类：夸剧情的、夸角色的、骂卡顿的、催福利的，一眼看完。' },
-  { icon: P.spark, title: '有问题，直接问', desc: '不想翻报表？打字问一句就行。助手会先去查数据再回答，数字都有出处，不瞎编。' },
+const modules = [
+  { icon: P.chart, path: '/dashboard', title: '总览看板', desc: '今天的游戏，活得好不好',
+    points: ['今天来了多少人，新玩家和老玩家各占多少', '今天一共收了多少钱', '最近哪天人最多、哪天最少', '和昨天、上周比，是涨还是跌'] },
+  { icon: P.users, path: '/segment', title: '玩家分群', desc: '把玩家分好组，对谁说什么话',
+    points: ['氪金大佬都有谁', '月卡党、肝帝、剧情党各有多少人', '每一组人最喜欢什么、最烦什么', '哪一组人最近不活跃了'] },
+  { icon: P.bell, path: '/churn', title: '流失预警', desc: '谁要走，提前拦',
+    points: ['谁最近上线越来越少', '他想走的原因是什么', '先救哪一批人最划算', '最后救回来了多少人'] },
+  { icon: P.gem, path: '/gacha', title: '付费与抽卡', desc: '钱和卡池，都算清',
+    points: ['哪个卡池卖得最好', '平均多少抽出一个金', '保底歪了多少次', '大佬们都在为谁花钱'] },
+  { icon: P.chat, path: '/feedback', title: '版本反馈', desc: '新版本，玩家买不买账',
+    points: ['被夸得最多的是哪一点', '被骂得最惨的是哪一点', '玩家最想要的新东西是什么', '和上一个版本比，口碑变好了吗'] },
+  { icon: P.spark, path: '/chat', title: '智能助手', desc: '不想翻报表，就直接问',
+    points: ['打字问一句，数字马上来', '让它把新版本总结成一段话', '查某个玩家最近在干什么', '每个回答都标出处，不瞎编'] },
 ]
+function openEntry(path: string) {
+  if (localStorage.getItem('token')) { router.push(path); return }
+  localStorage.setItem('post_login_redirect', path)
+  openAuth('password')
+}
 </script>
 
 <style scoped>
@@ -135,13 +158,10 @@ const features = [
 .orb-c { width: 300px; height: 300px; right: 22%; bottom: -6%; background: #DB2777; animation-delay: -9s; }
 @keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-26px) } }
 .glass-lite {
-  /* 只改边框：柔光发丝线轮廓（澎湃 OS 式）——顶部微亮、向下收暗、下缘回光；卡面与内文不动 */
-  border: 1px solid transparent;
-  background:
-    linear-gradient(145deg, rgba(255,255,255,.20), rgba(255,255,255,.08)) padding-box,
-    linear-gradient(168deg, rgba(255,255,255,.34), rgba(255,255,255,.11) 36%, rgba(255,255,255,.03) 64%, rgba(255,255,255,.15)) border-box;
-  -webkit-backdrop-filter: blur(26px) saturate(150%); backdrop-filter: blur(26px) saturate(150%);
-  box-shadow: 0 14px 34px rgba(2,6,23,.18), inset 0 1px 0 rgba(255,255,255,.16), inset 0 -1px 0 rgba(255,255,255,.03);
+  background: linear-gradient(145deg, rgba(255,255,255,.20), rgba(255,255,255,.08));
+  -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255,255,255,.32);
+  box-shadow: 0 12px 32px rgba(2,6,23,.28), inset 0 1px 0 rgba(255,255,255,.5);
 }
 .nav { position: relative; z-index: 5; margin: 18px auto 0; max-width: 1180px; border-radius: 24px;
   display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
@@ -174,20 +194,31 @@ const features = [
 .chip-1 { top: 22px; left: -26px; transform: rotate(-2deg); }
 .chip-2 { bottom: 64px; right: -18px; transform: rotate(1.6deg); }
 .chip-3 { bottom: -14px; left: 34px; transform: rotate(-1deg); }
-.showcase, .features { position: relative; z-index: 4; max-width: 1180px; margin: 74px auto 0; padding: 0 20px; }
-.section-title { text-align: center; font-size: 34px; font-weight: 900; margin: 0 0 30px; letter-spacing: .01em; }
 .show-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .show-card { margin: 0; border-radius: 26px; overflow: hidden; padding: 0; }
 .show-card img { display: block; width: 100%; height: 215px; object-fit: cover; }
 .show-card figcaption { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 5px; }
 .show-card b { font-size: 16px; }
 .show-card span { font-size: 13.5px; line-height: 1.6; color: rgba(255,255,255,.80); }
-.feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-.feature-card { border-radius: 26px; padding: 26px 24px; }
-.feature-card.wide { grid-column: span 2; }
-.feature-card h3 { margin: 12px 0 8px; font-size: 18px; font-weight: 700; }
-.feature-card p { margin: 0; color: rgba(255,255,255,.82); font-size: 14px; line-height: 1.7; }
-.f-icon { width: 30px; height: 30px; color: #C4B5FD; }
+.showcase, .features { position: relative; z-index: 4; max-width: 1180px; margin: 84px auto 0; padding: 0 20px; }
+.section-title { text-align: center; font-size: 34px; font-weight: 900; margin: 0 0 30px; letter-spacing: .01em; }
+.section-title.big { font-size: 40px; margin-bottom: 18px; }
+.section-summary { max-width: 780px; margin: 0 auto 44px; text-align: center; font-size: 16px; line-height: 1.9; color: rgba(255,255,255,.86); }
+.feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.feature-card { border-radius: 26px; padding: 32px 30px 28px; display: flex; flex-direction: column; }
+.feature-card h3 { margin: 14px 0 6px; font-size: 20px; font-weight: 800; }
+.f-desc { margin: 0 0 18px; color: rgba(255,255,255,.88); font-size: 14.5px; }
+.f-icon { width: 32px; height: 32px; color: #C4B5FD; }
+.f-points { list-style: none; margin: 0 0 22px; padding: 16px 0 0; border-top: 1px solid rgba(255,255,255,.16); display: flex; flex-direction: column; gap: 11px; flex: 1; }
+.f-points li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.55; color: rgba(255,255,255,.84); }
+.f-points .check { flex: 0 0 17px; width: 17px; height: 17px; margin-top: 2px; color: #A5B4FC; }
+.f-entry { font-size: 15px; font-weight: 700; color: #C7D2FE; cursor: pointer; }
+.f-entry .arrow { display: inline-block; transition: transform .18s ease; }
+.f-entry:hover .arrow { transform: translateX(4px); }
+.f-entry:hover { text-decoration: underline; }
+.summary-bar { margin-top: 22px; border-radius: 22px; padding: 20px 28px; display: flex; gap: 14px; align-items: baseline; justify-content: center; text-align: center; flex-wrap: wrap; }
+.summary-bar b { font-size: 16px; color: #FDE68A; white-space: nowrap; }
+.summary-bar span { font-size: 15px; color: rgba(255,255,255,.9); }
 .foot { position: relative; z-index: 4; text-align: center; color: rgba(255,255,255,.60); font-size: 12.5px; line-height: 1.9; padding: 54px 20px 34px; }
 .credits { color: rgba(255,255,255,.42); font-size: 12px; }
 .auth-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center;
