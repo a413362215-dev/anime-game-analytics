@@ -13,7 +13,8 @@ class TokenOut(BaseModel):
 class RegisterIn(BaseModel):
     username: str
     password: str
-    phone: str | None = None
+    phone: str
+    code: str
 
 class SmsSendIn(BaseModel):
     phone: str

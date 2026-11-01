@@ -13,8 +13,8 @@ export const useUserStore = defineStore('user', {
       const { data } = await request.post('/auth/login', { username, password })
       this.setSession(data)
     },
-    async register(username: string, password: string, phone: string) {
-      const { data } = await request.post('/auth/register', { username, password, phone: phone || null })
+    async register(username: string, password: string, phone: string, code: string) {
+      const { data } = await request.post('/auth/register', { username, password, phone, code })
       this.setSession(data)
     },
     async smsLogin(phone: string, code: string) {

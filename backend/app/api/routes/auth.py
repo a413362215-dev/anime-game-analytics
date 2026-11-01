@@ -13,8 +13,10 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 # 正式环境应换成真实短信服务商 + Redis 存储，接口形状不变
 _sms_codes: dict[str, tuple[str, float]] = {}
 
+DEMO_CODE = "123456"  # 演示环境统一验证码；正式环境换真实短信后删除
+
 def _issue_code(phone: str) -> str:
-    code = f"{random.randint(0, 999999):06d}"
+    code = DEMO_CODE
     _sms_codes[phone] = (code, time.time() + 300)
     return code
 
@@ -38,6 +40,10 @@ def login(body: LoginIn, db: Session = Depends(get_db)):
 
 @router.post("/register", response_model=TokenOut)
 def register(body: RegisterIn, db: Session = Depends(get_db)):
+    if not body.phone:
+        raise HTTPException(status_code=400, detail="注册需要手机号")
+    if not _check_code(body.phone, body.code or ""):
+        raise HTTPException(status_code=401, detail="验证码错误或已过期")
     if db.query(SysUser).filter(SysUser.username == body.username).first():
         raise HTTPException(status_code=400, detail="该账号已被注册")
     if body.phone and db.query(SysUser).filter(SysUser.phone == body.phone).first():

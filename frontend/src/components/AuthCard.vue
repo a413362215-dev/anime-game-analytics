@@ -26,7 +26,7 @@
         <el-input v-model="form.code" placeholder="验证码" size="large" class="glass-input" @keyup.enter="onSmsLogin" />
         <button class="code-btn" :disabled="countdown > 0" @click="sendCode">{{ countdown > 0 ? countdown + 's' : '获取验证码' }}</button>
       </div>
-      <p v-if="demoCode" class="demo-hint">演示环境验证码：{{ demoCode }}（正式环境将通过短信发送）</p>
+      <p v-if="demoCode" class="demo-hint">演示环境验证码统一为 123456（正式环境将通过短信发送）</p>
       <button class="primary-btn" :disabled="loading" @click="onSmsLogin">{{ loading ? '登录中…' : '登 录' }}</button>
       <div class="link-row"><a @click="mode = 'register'">注册账号</a><a @click="mode = 'forgot'">找回密码</a></div>
       <div class="divider"><span>或</span></div>
@@ -38,7 +38,12 @@
       <h2 class="card-title">注册账号</h2>
       <p class="card-sub">注册后自动登录进入系统</p>
       <div class="field"><el-input v-model="form.username" placeholder="账号" size="large" class="glass-input" /></div>
-      <div class="field"><el-input v-model="form.phone" placeholder="手机号（可选，用于短信登录）" size="large" class="glass-input" /></div>
+      <div class="field"><el-input v-model="form.phone" placeholder="手机号" size="large" class="glass-input" /></div>
+      <div class="field code-row">
+        <el-input v-model="form.code" placeholder="短信验证码" size="large" class="glass-input" />
+        <button class="code-btn" :disabled="countdown > 0" @click="sendCode">{{ countdown > 0 ? countdown + 's' : '获取验证码' }}</button>
+      </div>
+      <p v-if="demoCode" class="demo-hint">演示环境验证码统一为 123456</p>
       <div class="field"><el-input v-model="form.password" type="password" placeholder="设置密码" size="large" show-password class="glass-input" @keyup.enter="onRegister" /></div>
       <button class="primary-btn" :disabled="loading" @click="onRegister">{{ loading ? '注册中…' : '注册并登录' }}</button>
       <div class="link-row center"><a @click="mode = 'password'">已有账号，去登录</a></div>
@@ -54,7 +59,7 @@
         <el-input v-model="form.code" placeholder="验证码" size="large" class="glass-input" />
         <button class="code-btn" :disabled="countdown > 0" @click="sendCode">{{ countdown > 0 ? countdown + 's' : '获取验证码' }}</button>
       </div>
-      <p v-if="demoCode" class="demo-hint">演示环境验证码：{{ demoCode }}</p>
+      <p v-if="demoCode" class="demo-hint">演示环境验证码统一为 123456</p>
       <div class="field"><el-input v-model="form.newPassword" type="password" placeholder="新密码" size="large" show-password class="glass-input" @keyup.enter="onReset" /></div>
       <button class="primary-btn" :disabled="loading" @click="onReset">{{ loading ? '提交中…' : '重置密码' }}</button>
       <div class="link-row center"><a @click="mode = 'password'">返回登录</a></div>
@@ -109,7 +114,7 @@ async function onSmsLogin() {
 }
 async function onRegister() {
   loading.value = true; err.value = ''
-  try { await user.register(form.username, form.password, form.phone); router.push('/dashboard') }
+  try { await user.register(form.username, form.password, form.phone, form.code); router.push('/dashboard') }
   catch (e: any) { err.value = e.response?.data?.detail || '注册失败' }
   finally { loading.value = false }
 }
