@@ -42,7 +42,7 @@
 
 /* 悬浮玻璃导航：半透明 + backdrop 高斯模糊/增艳，色调随背后内容实时变化（Liquid Glass 同理） */
 .float-nav { position: sticky; top: 13px; z-index: 80; border-radius: 999px;
-  background: linear-gradient(150deg, rgba(22,26,60,.66), rgba(12,15,38,.58));
-  -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%);
-  border: 1px solid rgba(255,255,255,.22);
-  box-shadow: 0 16px 40px rgba(2,6,23,.38), inset 0 1px 0 rgba(255,255,255,.28); }
+  background: linear-gradient(150deg, rgba(20,24,56,.5), rgba(12,15,38,.42));
+  -webkit-backdrop-filter: blur(26px) saturate(175%); backdrop-filter: blur(26px) saturate(175%);
+  border: 1px solid rgba(255,255,255,.3);
+  box-shadow: 0 16px 40px rgba(2,6,23,.34), inset 0 1px 0 rgba(255,255,255,.35); }
