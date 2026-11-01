@@ -131,6 +131,12 @@ async function onReset() {
 </script>
 
 <style scoped>
+.glass-card::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(165deg, rgba(255,255,255,.95), rgba(255,255,255,.30) 32%, rgba(255,255,255,.06) 58%, rgba(255,255,255,.45));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
 .glass-card {
   position: relative; width: 400px; max-width: calc(100vw - 40px);
   padding: 36px 34px 30px;
@@ -164,7 +170,11 @@ async function onReset() {
   color: #fff; font-size: 16.5px; font-weight: 700; letter-spacing: 2px;
   box-shadow: 0 10px 24px rgba(59,90,246,.40), inset 0 1px 0 rgba(255,255,255,.55);
 }
+.primary-btn { transition: transform .18s cubic-bezier(.34,1.56,.64,1), filter .18s ease; }
+.primary-btn:active { transform: scale(.965); filter: brightness(1.13); }
 .primary-btn:disabled { opacity: .65; cursor: wait; }
+.ghost-btn { transition: transform .18s cubic-bezier(.34,1.56,.64,1), filter .18s ease; }
+.ghost-btn:active { transform: scale(.965); filter: brightness(1.13); }
 .ghost-btn {
   width: 100%; height: 46px; border-radius: 23px; cursor: pointer;
   background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.38); color: #fff; font-size: 14.5px;
