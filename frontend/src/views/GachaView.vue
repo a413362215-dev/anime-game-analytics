@@ -9,7 +9,7 @@
   </div>
   <div class="panel" style="margin-top: 18px"><div class="p-head"><h3 class="p-title">大佬抽卡榜</h3><span class="p-sub">近 180 天 · 按总抽数排序 · 抽卡为样本口径</span></div>
     <table class="tbl"><thead><tr><th>玩家</th><th>总抽数</th><th>累计消费</th><th>五星数</th><th>平均出货</th><th>最爱卡池</th></tr></thead>
-    <tbody><tr v-for="p in tops" :key="p.name + p.uid_tail"><td><b>{{ p.name }}</b><span class="uid">UID ··{{ p.uid_tail }}</span></td><td>{{ fmt(p.pulls) }}</td><td>¥{{ fmt(p.spend) }}</td><td>{{ p.five }}</td>
+    <tbody><tr v-for="p in tops" :key="p.name + p.uid_tail"><td><b>{{ p.name }}</b><span class="uid" style="display: block; margin-left: 0">UID ··{{ p.uid_tail }}</span></td><td>{{ fmt(p.pulls) }}</td><td>¥{{ fmt(p.spend) }}</td><td>{{ p.five }}</td>
       <td>{{ p.avg_pity }} 抽</td><td><span class="chip-tag">{{ p.pool }}</span></td></tr></tbody></table></div>
 </template>
 <script setup lang="ts">
