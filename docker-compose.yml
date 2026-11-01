@@ -1,0 +1,34 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: aga
+      POSTGRES_PASSWORD: aga_password
+      POSTGRES_DB: anime_game_analytics
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://aga:aga_password@db:5432/anime_game_analytics
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: change-me-in-production
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+volumes:
+  pgdata:
