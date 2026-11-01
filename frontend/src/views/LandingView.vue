@@ -168,12 +168,14 @@ function openEntry(path: string) {
 .logo { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 16px; letter-spacing: .04em; }
 .logo-mark { width: 22px; height: 22px; }
 .nav-links { display: flex; gap: 28px; }
-.nav-links a { color: rgba(255,255,255,.86); text-decoration: none; font-size: 14.5px; font-weight: 500; }
+.nav-links a { color: rgba(255,255,255,.86); text-decoration: none; font-size: 14.5px; font-weight: 500; padding: 8px 16px; border-radius: 999px; transition: all .25s ease; }
+.nav-links a:hover { background: linear-gradient(135deg, #60A5FA, #818CF8 55%, #E879F9); color: #fff; box-shadow: 0 8px 22px rgba(99,102,241,.45), inset 0 1px 0 rgba(255,255,255,.5); }
 .nav-actions { display: flex; gap: 10px; }
 .btn-ghost { border: 1px solid rgba(255,255,255,.45); background: rgba(255,255,255,.12); color: #fff;
-  padding: 9px 22px; border-radius: 999px; cursor: pointer; font-size: 14.5px; font-family: inherit; }
-.btn-solid { border: none; color: #fff; padding: 9px 22px; border-radius: 999px; cursor: pointer; font-size: 14.5px; font-weight: 700; font-family: inherit;
-  background: linear-gradient(135deg, #60A5FA, #818CF8 55%, #E879F9); box-shadow: 0 8px 20px rgba(59,90,246,.35), inset 0 1px 0 rgba(255,255,255,.5); }
+  padding: 9px 22px; border-radius: 999px; cursor: pointer; font-size: 14.5px; font-family: inherit; transition: all .25s ease; }
+.btn-ghost:hover, .btn-solid:hover { background: linear-gradient(135deg, #60A5FA, #818CF8 55%, #E879F9); border-color: transparent; box-shadow: 0 10px 26px rgba(99,102,241,.5), inset 0 1px 0 rgba(255,255,255,.5); }
+.btn-solid { border: 1px solid rgba(255,255,255,.45); color: #fff; padding: 9px 22px; border-radius: 999px; cursor: pointer; font-size: 14.5px; font-weight: 700; font-family: inherit;
+  background: rgba(255,255,255,.12); box-shadow: none; transition: all .25s ease; }
 .btn-solid.big, .btn-ghost.big { padding: 14px 36px; font-size: 16px; }
 .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .32em; color: rgba(255,255,255,.66); margin: 0 0 18px; }
 .eyebrow.center { text-align: center; }
