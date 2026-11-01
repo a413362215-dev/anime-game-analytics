@@ -12,10 +12,10 @@
         </RouterLink>
       </nav>
       <div class="nav-right">
-        <span class="demo-badge">演示数据</span>
+        <span class="demo-badge">模拟数据</span>
         <div class="game-switch">
-          <button :class="{ on: game === 'gi' }" @click="game = 'gi'">原神</button>
-          <button :class="{ on: game === 'hsr' }" @click="game = 'hsr'">崩铁</button>
+          <button :class="{ on: gameStore.game === 'gi' }" @click="gameStore.setGame('gi')">原神</button>
+          <button :class="{ on: gameStore.game === 'hsr' }" @click="gameStore.setGame('hsr')">崩铁</button>
         </div>
         <span class="avatar" :title="user.username + '（' + (user.role === 'admin' ? '管理员' : '分析师') + '）'">{{ (user.username || 'A').slice(0, 1).toUpperCase() }}</span>
         <button class="icon-btn" title="退出登录" @click="onLogout">
@@ -31,9 +31,9 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
+import { useGameStore } from '../stores/game'
 const I = {
   chart: '<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',
   users: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.5 5.5-4.5S13.9 16 14.5 19"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.6c2.3.1 4.2 1.5 4.8 4.4"/>',
@@ -59,7 +59,7 @@ const pages = [
   { path: '/data', title: '数据管理', icon: I.db },
 ]
 const user = useUserStore(); const router = useRouter()
-const game = ref('gi')
+const gameStore = useGameStore()
 function onLogout() { user.logout(); router.push('/') }
 </script>
 <style scoped>

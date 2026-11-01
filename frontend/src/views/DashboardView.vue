@@ -15,6 +15,7 @@
           <div><p>{{ f.text }}</p><span>{{ f.time }}</span></div></div>
       </div></div>
   </div>
+  <p v-if="fromDb" class="src-note">本页数字来自数据库聚合（模拟生成的 180 天数据），切换顶栏游戏可看另一款。</p>
   <div class="grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 18px">
     <div class="panel"><div class="p-head"><h3 class="p-title">卡池收入 TOP 5</h3><span class="p-sub">本版本累计</span></div><ChartBox :option="bannerOpt" :height="218" /></div>
     <div class="panel"><div class="p-head"><h3 class="p-title">玩家构成</h3><span class="p-sub">按付费习惯分</span></div><ChartBox :option="mixOpt" :height="218" /></div>
@@ -22,54 +23,83 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import ChartBox from '../components/ChartBox.vue'
-import { DAYS, series, ax, TIP, LEG, PALETTE } from '../mock/data'
-const kpis = [
-  { label: '今日活跃玩家', value: '128,540', delta: '+4.2%', up: true, note: '周六晚间高峰未到' },
-  { label: '新增玩家', value: '8,642', delta: '+11.3%', up: true, note: '新版本预热带来一波' },
-  { label: '今日流水', value: '¥486,200', delta: '+7.9%', up: true, note: '新卡池开启第 3 天' },
-  { label: '次日留存', value: '46.8%', delta: '-0.6pt', up: false, note: '新手期流失略有抬头' },
-]
-const feed = [
-  { tag: '版本', cls: 'b-purple', text: '5.2 版本「流光拾遗之旅」开启第 3 天，活跃创近 30 日新高', time: '今天 09:20' },
-  { tag: '卡池', cls: 'b-blue', text: '限定卡池「月下拾光」收入进入版本 TOP 2', time: '今天 08:45' },
-  { tag: '预警', cls: 'b-red', text: '新手引导第 4 关流失率较昨日上升 2.1pt，已同步流失预警', time: '今天 08:10' },
-  { tag: '反馈', cls: 'b-amber', text: '版本反馈新增 3,214 条，「优化卡顿」话题热度上升', time: '昨天 23:40' },
-  { tag: '实验', cls: 'b-green', text: '实验「新手礼包改版」达到显著，胜率 97.3%', time: '昨天 21:15' },
-]
+import request from '../api/request'
+import { useGameStore } from '../stores/game'
+import { DAYS, series, ax, TIP, LEG, PALETTE, fmt } from '../mock/data'
+
+// 先用前端演示值占位，后端有响应就整体换成数据库聚合（阶段 2 起总览页读真库）
+const kpis = ref<any[]>([
+  { label: '今日活跃玩家', value: '—', delta: '', up: true, note: '正在从数据库读取…' },
+  { label: '新增玩家', value: '—', delta: '', up: true, note: '' },
+  { label: '今日流水', value: '—', delta: '', up: true, note: '' },
+  { label: '次日留存', value: '—', delta: '', up: true, note: '' },
+])
+const feed = ref<any[]>([])
+const trendDays = ref<string[]>(DAYS)
+const trendDau = ref<number[]>(series(112000, 0.14, 7))
+const trendRev = ref<number[]>(series(44, 0.3, 21))
+const bannerNames = ref<string[]>(['月下拾光', '星海巡航', '花间四杰', '云间候月', '常驻祈愿'])
+const bannerVals = ref<number[]>([486, 352, 289, 176, 158])
+const mixData = ref<any[]>([
+  { value: 46, name: '零氪', itemStyle: { color: '#60A5FA' } }, { value: 27, name: '月卡党', itemStyle: { color: '#818CF8' } },
+  { value: 18, name: '中R', itemStyle: { color: '#E879F9' } }, { value: 9, name: '大R', itemStyle: { color: '#FBBF24' } }])
+const retWeeks = ref<string[]>(['10/06 期', '10/13 期', '10/20 期', '10/27 期'])
+const retD1 = ref<number[]>([44.1, 45.6, 46.9, 46.8])
+const retD7 = ref<number[]>([26.3, 27.8, 28.4, 29.1])
+const fromDb = ref(false)
+
+const gameStore = useGameStore()
+async function load() {
+  try {
+    const { data } = await request.get('/analytics/overview', { params: { game: gameStore.game } })
+    if (data.error) return
+    kpis.value = data.kpis
+    feed.value = data.feed
+    trendDays.value = data.trend.days; trendDau.value = data.trend.dau; trendRev.value = data.trend.revenue_wan
+    bannerNames.value = data.banner_top.map((b: any) => b.name); bannerVals.value = data.banner_top.map((b: any) => b.amount_wan)
+    const colors: Record<string, string> = { '零氪': '#60A5FA', '月卡党': '#818CF8', '中R': '#E879F9', '大R': '#FBBF24' }
+    mixData.value = data.mix.map((m: any) => ({ value: m.value, name: m.name, itemStyle: { color: colors[m.name] || '#818CF8' } }))
+    retWeeks.value = data.retention.weeks; retD1.value = data.retention.d1; retD7.value = data.retention.d7
+    fromDb.value = true
+  } catch { /* 后端没起时保留演示值，不白屏 */ }
+}
+onMounted(load)
+watch(() => gameStore.game, load)
+
 const trendOpt = computed(() => ({
   tooltip: TIP, legend: { ...LEG, top: 0 }, grid: { left: 8, right: 8, top: 34, bottom: 0, containLabel: true },
-  xAxis: { type: 'category', data: DAYS, ...ax, axisLine: ax.axisLine, axisLabel: ax.axisLabel },
+  xAxis: { type: 'category', data: trendDays.value, ...ax, axisLine: ax.axisLine, axisLabel: ax.axisLabel },
   yAxis: [{ type: 'value', name: '活跃', ...ax }, { type: 'value', name: '流水(万)', splitLine: { show: false }, axisLabel: ax.axisLabel }],
   series: [
-    { name: '活跃玩家', type: 'line', smooth: true, symbol: 'none', lineStyle: { width: 2.4 }, color: PALETTE[0], areaStyle: { color: 'rgba(129,140,248,.16)' }, data: series(112000, 0.14, 7) },
-    { name: '流水(万元)', type: 'line', yAxisIndex: 1, smooth: true, symbol: 'none', lineStyle: { width: 2.4 }, color: PALETTE[1], data: series(44, 0.3, 21) },
+    { name: '活跃玩家', type: 'line', smooth: true, symbol: 'none', lineStyle: { width: 2.4 }, color: PALETTE[0], areaStyle: { color: 'rgba(129,140,248,.16)' }, data: trendDau.value },
+    { name: '流水(万元)', type: 'line', yAxisIndex: 1, smooth: true, symbol: 'none', lineStyle: { width: 2.4 }, color: PALETTE[1], data: trendRev.value },
   ],
 }))
 const bannerOpt = computed(() => ({
   tooltip: TIP, grid: { left: 8, right: 16, top: 6, bottom: 0, containLabel: true },
-  xAxis: { type: 'value', ...ax }, yAxis: { type: 'category', inverse: true, data: ['月下拾光', '星海巡航', '花间四杰', '云间候月', '常驻祈愿'], axisLabel: ax.axisLabel, axisLine: { show: false } },
-  series: [{ type: 'bar', data: [486, 352, 289, 176, 158], barWidth: 13, itemStyle: { color: { type: 'linear', x: 0, y: 0, x2: 1, y2: 0, colorStops: [{ offset: 0, color: '#60A5FA' }, { offset: 1, color: '#E879F9' }] }, borderRadius: [0, 7, 7, 0] }, label: { show: true, position: 'right', color: 'rgba(238,240,255,.7)', fontSize: 11.5, formatter: '¥{c}万' } }],
+  xAxis: { type: 'value', ...ax }, yAxis: { type: 'category', inverse: true, data: bannerNames.value, axisLabel: ax.axisLabel, axisLine: { show: false } },
+  series: [{ type: 'bar', data: bannerVals.value, barWidth: 13, itemStyle: { color: { type: 'linear', x: 0, y: 0, x2: 1, y2: 0, colorStops: [{ offset: 0, color: '#60A5FA' }, { offset: 1, color: '#E879F9' }] }, borderRadius: [0, 7, 7, 0] }, label: { show: true, position: 'right', color: 'rgba(238,240,255,.7)', fontSize: 11.5, formatter: '¥{c}万' } }],
 }))
 const mixOpt = computed(() => ({
   tooltip: TIP, legend: { ...LEG, bottom: 0, left: 'center' },
   series: [{ type: 'pie', radius: ['52%', '74%'], center: ['50%', '44%'], itemStyle: { borderColor: 'rgba(10,14,39,.9)', borderWidth: 2 },
-    label: { color: 'rgba(238,240,255,.8)', fontSize: 11.5 },
-    data: [ { value: 46, name: '零氪', itemStyle: { color: '#60A5FA' } }, { value: 27, name: '月卡党', itemStyle: { color: '#818CF8' } }, { value: 18, name: '中R', itemStyle: { color: '#E879F9' } }, { value: 9, name: '大R', itemStyle: { color: '#FBBF24' } } ] }],
+    label: { color: 'rgba(238,240,255,.8)', fontSize: 11.5, formatter: (p: any) => `${p.name} ${Math.round(p.percent)}%` }, data: mixData.value }],
 }))
 const retOpt = computed(() => ({
   tooltip: TIP, legend: { ...LEG, top: 0 }, grid: { left: 8, right: 8, top: 32, bottom: 0, containLabel: true },
-  xAxis: { type: 'category', data: ['10/06 期', '10/13 期', '10/20 期', '10/27 期'], axisLabel: ax.axisLabel, axisLine: ax.axisLine },
-  yAxis: { type: 'value', max: 60, ...ax, axisLabel: { ...ax.axisLabel, formatter: '{value}%' } },
+  xAxis: { type: 'category', data: retWeeks.value, axisLabel: ax.axisLabel, axisLine: ax.axisLine },
+  yAxis: { type: 'value', max: 70, ...ax, axisLabel: { ...ax.axisLabel, formatter: '{value}%' } },
   series: [
-    { name: '次日留存', type: 'bar', barWidth: 11, color: PALETTE[2], itemStyle: { borderRadius: [5, 5, 0, 0] }, data: [44.1, 45.6, 46.9, 46.8] },
-    { name: '7 日留存', type: 'bar', barWidth: 11, color: PALETTE[1], itemStyle: { borderRadius: [5, 5, 0, 0] }, data: [26.3, 27.8, 28.4, 29.1] },
+    { name: '次日留存', type: 'bar', barWidth: 11, color: PALETTE[2], itemStyle: { borderRadius: [5, 5, 0, 0] }, data: retD1.value },
+    { name: '7 日留存', type: 'bar', barWidth: 11, color: PALETTE[1], itemStyle: { borderRadius: [5, 5, 0, 0] }, data: retD7.value },
   ],
 }))
 </script>
 <style scoped>
 .feed { display: flex; flex-direction: column; gap: 15px; }
+.src-note { margin: 16px 2px 0; font-size: 12px; color: rgba(238,240,255,.45); }
 .feed-item { display: flex; gap: 11px; align-items: flex-start; }
 .feed-item p { margin: 0; font-size: 13.5px; line-height: 1.55; }
 .feed-item span { font-size: 11.5px; color: rgba(238,240,255,.45); }
