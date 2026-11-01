@@ -8,7 +8,7 @@
       <p class="card-sub">欢迎回来，今天也一起看看他们吧</p>
       <div class="field"><el-input v-model="form.username" placeholder="账号" size="large" class="glass-input" /></div>
       <div class="field"><el-input v-model="form.password" type="password" placeholder="密码" size="large" show-password class="glass-input" @keyup.enter="onLogin" /></div>
-      <button class="primary-btn" :disabled="loading" @click="onLogin">{{ loading ? '登录中…' : '登 录' }}</button>
+      <button class="primary-btn" :disabled="loading" @click="onLogin">{{ loading ? '登录中…' : '登录' }}</button>
       <div class="link-row">
         <a @click="mode = 'register'">注册账号</a>
         <a @click="mode = 'forgot'">找回密码</a>
@@ -27,7 +27,7 @@
         <button class="code-btn" :disabled="countdown > 0" @click="sendCode">{{ countdown > 0 ? countdown + 's' : '获取验证码' }}</button>
       </div>
       <p v-if="demoCode" class="demo-hint">演示环境验证码统一为 123456（正式环境将通过短信发送）</p>
-      <button class="primary-btn" :disabled="loading" @click="onSmsLogin">{{ loading ? '登录中…' : '登 录' }}</button>
+      <button class="primary-btn" :disabled="loading" @click="onSmsLogin">{{ loading ? '登录中…' : '登录' }}</button>
       <div class="link-row"><a @click="mode = 'register'">注册账号</a><a @click="mode = 'forgot'">找回密码</a></div>
       <div class="divider"><span>或</span></div>
       <button class="ghost-btn" @click="mode = 'password'">切换为密码登录</button>
