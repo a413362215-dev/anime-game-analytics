@@ -138,13 +138,14 @@ def generate(db: Session) -> dict:
                 if x <= acc:
                     reg = d; break
             tier = _pick(gr, TIER_W)
-            lu = gr.random()
-            lifespan = gr.randint(1, 7) if lu < 0.30 else gr.randint(8, 30) if lu < 0.55 else gr.randint(31, 90) if lu < 0.75 else 10 ** 9
+            # 个人黏性（异质性）：真实玩家有人天天上线、有人三天打鱼——早期行为因此才预测得了去留；
+            # 没有这一层时活跃是无记忆抛硬币，任何流失模型都只能学出 AUC≈0.5（阶段 6 实测教训）
+            prop = gr.choices([0.35, 0.7, 1.0, 1.45, 2.1], weights=[18, 30, 27, 15, 10])[0]
             players.append({
                 "game_id": gid, "external_uid": f"{880000000 + pi * 7 + gr.randint(0, 5)}",
                 "nickname": f"旅人{pi:04d}", "channel": _pick(gr, CHANNELS),
                 "register_date": reg, "level": 1, "payer_tier": tier,
-                "total_spend": 0.0, "last_active_date": None, "_tier": tier, "_reg": reg, "_lifespan": lifespan,
+                "total_spend": 0.0, "last_active_date": None, "_tier": tier, "_reg": reg, "_prop": prop, "_dead": False,
                 "_active_days": [], "_spend": 0.0, "_pulls30": 0, "_sess": [],
             })
         db.bulk_insert_mappings(DimPlayer, [{k: v for k, v in p.items() if not k.startswith("_")} for p in players])
@@ -171,8 +172,15 @@ def generate(db: Session) -> dict:
                 if p["_reg"] > d:
                     continue
                 age = (d - p["_reg"]).days
-                if age > p["_lifespan"]:
+                if p["_dead"]:
                     continue  # 已永久离站（流失），不再产生任何行为
+                if age >= 1:
+                    # 退出是内生的：黏性越低、走得越快；新手头两天另有跳失加成。
+                    # （早期版本用与行为无关的外生寿命抽签，去留纯靠运气，流失模型学不出东西——实测教训）
+                    quit_q = 0.012 / p["_prop"] * (3 if age <= 2 else 1)
+                    if gr.random() < quit_q:
+                        p["_dead"] = True
+                        continue
                 if p["_reg"] == d:
                     new_u += 1
                     # 新手漏斗：注册当天走教程，逐步流失（第 4 关掉得最多，和漏斗页口径一致）
@@ -192,11 +200,17 @@ def generate(db: Session) -> dict:
                 base *= wknd
                 if p["_tier"] in ("dolphin", "whale"):
                     base *= 1.35
+                base *= p["_prop"]
                 if gr.random() > min(base, .93):
                     continue
                 dau += 1
                 p["_active_days"].append(d)
                 p["last_active_date"] = d
+                # 登录事件是第一方全量遥测（DAU 本就由此统计）——与富会话明细（样本）分开：
+                # 没有这层全量活跃信号，流失模型对 90% 玩家没有任何可学的特征（阶段 6 实测教训）
+                events.append({"game_id": gid, "player_id": p["_id"], "source_id": sources["simulator"],
+                               "event_name": "login", "event_date": d,
+                               "event_time": datetime.combine(d, dtime(9, 30)), "props": ""})
                 dur = round(gr.lognormvariate(3.4, .7), 1)
                 p["_sess"].append(dur)
                 if pi in tracked:

@@ -238,3 +238,36 @@ def segments(game: str = Query("gi"), db: Session = Depends(get_db)):
         return {"error": "game not found"}
     out = get_segments(db, g.id)
     return {"game": game, **out}
+
+
+@router.get("/analytics/churn")
+def churn(game: str = Query("gi"), db: Session = Depends(get_db)):
+    from ...services.churn import get_churn
+    from ...services.datagen import END as DATA_END
+    g = _game(db, game)
+    if not g:
+        return {"error": "game not found"}
+    out = get_churn(db, g, DATA_END)
+    # 名单附上阶段 5 的分群标签（同一名玩家在两个模型里对得上号）
+    try:
+        from ...services.segmentation import compute_segments, SEG_MAP
+        from ...models.core import PlayerFeatureSnapshot
+        rd = db.query(func.max(PlayerFeatureSnapshot.run_date)).filter(
+            PlayerFeatureSnapshot.game_id == g.id).scalar()
+        seg = compute_segments(db, g.id, rd)
+        id2seg = {sn.player_id: SEG_MAP[l][1] for sn, l in zip(seg["_snaps"], seg["_labels"])}
+        for row in out["live"]:
+            row["segment"] = id2seg.get(row.get("player_id"), "—")
+    except Exception:
+        for row in out["live"]:
+            row["segment"] = "—"
+    high = sum(t["count"] for t in out["tiers"] if t["name"] in ("极高风险", "高风险"))
+    mid = next(t["count"] for t in out["tiers"] if t["name"] == "中风险")
+    top_tier = out["tiers"][0]
+    kpis = [
+        {"label": "高风险玩家（测试集）", "value": f"{high:,}", "note": "未来 14 天大概率离站"},
+        {"label": "中风险玩家（测试集）", "value": f"{mid:,}", "note": "活跃正在下滑，先观察"},
+        {"label": "模型 AUC（时间切分测试）", "value": f"{out['auc']}", "note": f"PR-AUC {out['pr_auc']} · 基准流失率 {out['base_churn_rate']}%"},
+        {"label": "极高风险组实际流失率", "value": f"{top_tier['churn_rate']}%", "note": "分层校准：分数越高、流失越真"},
+    ]
+    return {"game": game, "kpis": kpis, **out}
