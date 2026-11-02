@@ -4,55 +4,70 @@
     <div class="panel" v-for="k in kpis" :key="k.label"><p class="kpi-label">{{ k.label }}</p><p class="kpi-num">{{ k.value }}</p><p class="kpi-foot">{{ k.note }}</p></div>
   </div>
   <div class="grid" style="grid-template-columns: 1.6fr 1fr; margin-top: 18px">
-    <div class="panel"><div class="p-head"><h3 class="p-title">累计 LTV 曲线 · 10 月新玩家队列</h3><span class="p-sub">实线为已发生的 30 天，虚线为各模型外推</span></div>
+    <div class="panel"><div class="p-head"><h3 class="p-title">累计 LTV 曲线 · 测试队列</h3><span class="p-sub">实线为实测累计，虚线为各模型外推（按实测累积形态展开）</span></div>
       <ChartBox :option="curveOpt" :height="292" /></div>
-    <div class="panel"><div class="p-head"><h3 class="p-title">三模型对比</h3><span class="p-sub">时间切分验证</span></div>
-      <table class="tbl"><thead><tr><th>模型</th><th>MAE</th><th>RMSE</th></tr></thead>
-      <tbody><tr v-for="m in models" :key="m.name"><td><b>{{ m.name }}</b><span class="m-note">{{ m.note }}</span></td><td>{{ m.mae }}</td><td>{{ m.rmse }}</td></tr></tbody></table>
-      <p class="honest">验证口径：只用玩家前 7 天行为预测后续，特征按时间切分，杜绝「用未来猜过去」式的虚假高分。</p></div>
+    <div class="panel"><div class="p-head"><h3 class="p-title">三模型对比</h3><span class="p-sub">时间切分验证 · 测试 {{ fmt(testN) }} 人</span></div>
+      <table class="tbl"><thead><tr><th>模型</th><th>MAE</th><th>Spearman</th></tr></thead>
+      <tbody><tr v-for="m in models" :key="m.name"><td><b>{{ m.name }}</b><span class="m-note">{{ NOTES[m.name] }}</span></td><td>{{ m.mae }}</td><td>{{ m.spearman }}</td></tr></tbody></table>
+      <p class="honest">验证口径：只用玩家前 30 天（校准窗）预测第 31~90 天消费，按注册日期切分训练/测试。没有哪个模型全赢：回归金额最准、Cox 排序最好、BG/NBD 对 79% 无交易玩家是盲区（付费子集 Spearman 单列在明细数据里）。</p></div>
   </div>
-  <div class="panel" style="margin-top: 18px"><div class="p-head"><h3 class="p-title">各注册月队列 · 90 日 LTV 预测</h3><span class="p-sub">单位：元 / 人</span></div>
+  <div class="panel" style="margin-top: 18px"><div class="p-head"><h3 class="p-title">各注册月队列 · 90 日 LTV</h3><span class="p-sub">单位：元 / 人 · 深色为实测、浅色为三模型中位数预测</span></div>
     <ChartBox :option="cohortOpt" :height="216" /></div>
 </template>
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import ChartBox from '../components/ChartBox.vue'
-import { ax, TIP, LEG, PALETTE } from '../mock/data'
-const kpis = [
-  { label: '新玩家 30 日 LTV', value: '¥86.4', note: '较上期队列 +5.1%' },
-  { label: '新玩家 90 日 LTV（预测）', value: '¥212.7', note: '三模型中位数' },
-  { label: '付费玩家 LTV', value: '¥694', note: '占新玩家 14.2%' },
-  { label: '回本周期（CAC 口径）', value: '23 天', note: '按当前买量成本估算' },
-]
-const models = [
-  { name: 'XGBoost 回归', note: '7/30/90 天三段预测', mae: '18.6', rmse: '31.2' },
-  { name: 'BG/NBD + Gamma-Gamma', note: '经典概率模型，稳', mae: '21.4', rmse: '35.8' },
-  { name: 'Cox 生存分析', note: '先估留存，再叠付费', mae: '23.9', rmse: '38.1' },
-]
-const days = Array.from({ length: 91 }, (_, i) => i)
-const actual = days.map(d => d <= 30 ? Math.round(212 * (1 - Math.exp(-d / 16)) * 0.62) : null)
-const xgb = days.map(d => Math.round(218 * (1 - Math.exp(-d / 17))))
-const bgnbd = days.map(d => Math.round(205 * (1 - Math.exp(-d / 19))))
-const curveOpt = computed(() => ({
-  tooltip: TIP, legend: { ...LEG, top: 0 }, grid: { left: 8, right: 12, top: 34, bottom: 0, containLabel: true },
-  xAxis: { type: 'category', data: days, name: '注册后天数', axisLabel: { ...ax.axisLabel, interval: 14 }, axisLine: ax.axisLine },
-  yAxis: { type: 'value', name: '累计 ¥', ...ax },
-  series: [
-    { name: '实测（前 30 天）', type: 'line', data: actual, symbol: 'none', lineStyle: { width: 2.6 }, color: '#EEF0FF' },
-    { name: 'XGBoost', type: 'line', data: xgb, symbol: 'none', lineStyle: { width: 2, type: 'dashed' }, color: PALETTE[0] },
-    { name: 'BG/NBD+GG', type: 'line', data: bgnbd, symbol: 'none', lineStyle: { width: 2, type: 'dashed' }, color: PALETTE[1] },
-  ],
-}))
+import request from '../api/request'
+import { useGameStore } from '../stores/game'
+import { ax, TIP, LEG, PALETTE, fmt } from '../mock/data'
+
+const NOTES: Record<string, string> = {
+  'BG/NBD + Gamma-Gamma': '经典概率模型，只认交易记录',
+  'LightGBM 回归': '行为特征直接回归，金额最准',
+  'Cox 生存 + 付费率': '先估留存再叠付费，排序最好',
+}
+const kpis = ref<any[]>([])
+const models = ref<any[]>([])
+const curve = ref<any>(null)
+const cohorts = ref<any[]>([])
+const testN = ref(0)
+const gameStore = useGameStore()
+async function load() {
+  try {
+    const { data } = await request.get('/analytics/ltv', { params: { game: gameStore.game } })
+    if (data.error) return
+    kpis.value = data.kpis; models.value = data.models; curve.value = data.curve
+    cohorts.value = data.cohorts; testN.value = data.test_n
+  } catch { /* 后端离线时保持空态 */ }
+}
+onMounted(load)
+watch(() => gameStore.game, load)
+
+const curveOpt = computed(() => {
+  if (!curve.value) return {}
+  const names = Object.keys(curve.value.models)
+  return {
+    tooltip: TIP, legend: { ...LEG, top: 0 }, grid: { left: 8, right: 12, top: 34, bottom: 0, containLabel: true },
+    xAxis: { type: 'category', data: curve.value.days, name: '注册后天数', axisLabel: { ...ax.axisLabel }, axisLine: ax.axisLine },
+    yAxis: { type: 'value', name: '累计 ¥', ...ax },
+    series: [
+      { name: '实测累计', type: 'line', data: curve.value.actual, symbol: 'none', lineStyle: { width: 2.6 }, color: '#EEF0FF' },
+      ...names.map((n: string, i: number) => ({ name: n, type: 'line', data: curve.value.models[n], symbol: 'none',
+        lineStyle: { width: 2, type: 'dashed' }, color: PALETTE[i % PALETTE.length] })),
+    ],
+  }
+})
 const cohortOpt = computed(() => ({
-  tooltip: TIP, grid: { left: 8, right: 12, top: 10, bottom: 0, containLabel: true },
-  xAxis: { type: 'category', data: ['5 月', '6 月', '7 月', '8 月', '9 月', '10 月'], axisLabel: ax.axisLabel, axisLine: ax.axisLine },
-  yAxis: { type: 'value', ...ax },
-  series: [{ type: 'bar', barWidth: 34, data: [168, 175, 189, 196, 204, 213],
-    itemStyle: { color: { type: 'linear', x: 0, y: 1, x2: 0, y2: 0, colorStops: [{ offset: 0, color: '#60A5FA' }, { offset: 1, color: '#E879F9' }] }, borderRadius: [8, 8, 0, 0] },
-    label: { show: true, position: 'top', color: 'rgba(238,240,255,.75)', fontSize: 12, formatter: '¥{c}' } }],
+  tooltip: { ...TIP, formatter: (p: any) => `${p.name} 月注册队列<br/>90 日 LTV ¥${p.value}（${cohorts.value[p.dataIndex]?.kind}）` },
+  grid: { left: 8, right: 10, top: 12, bottom: 0, containLabel: true },
+  xAxis: { type: 'category', data: cohorts.value.map(c => `${c.month}月`), axisLabel: ax.axisLabel, axisLine: ax.axisLine },
+  yAxis: { type: 'value', name: '¥ / 人', ...ax },
+  series: [{ type: 'bar', barWidth: '52%',
+    data: cohorts.value.map(c => ({ value: c.value, itemStyle: { color: c.kind === '实测' ? '#818CF8' : 'rgba(129,140,248,.38)', borderRadius: [6, 6, 0, 0] } })),
+    label: { show: true, position: 'top', color: 'rgba(238,240,255,.7)', fontSize: 11.5 } }],
 }))
 </script>
 <style scoped>
 .m-note { display: block; font-size: 11.5px; color: rgba(238,240,255,.45); margin-top: 2px; }
-.honest { margin: 14px 0 0; font-size: 12.5px; line-height: 1.7; color: rgba(238,240,255,.6); background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.25); padding: 11px 14px; border-radius: 12px; }
+.honest { margin: 12px 2px 0; font-size: 12.5px; line-height: 1.65; color: rgba(238,240,255,.55); }
 </style>

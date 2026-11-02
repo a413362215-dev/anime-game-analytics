@@ -271,3 +271,13 @@ def churn(game: str = Query("gi"), db: Session = Depends(get_db)):
         {"label": "极高风险组实际流失率", "value": f"{top_tier['churn_rate']}%", "note": "分层校准：分数越高、流失越真"},
     ]
     return {"game": game, "kpis": kpis, **out}
+
+
+@router.get("/analytics/ltv")
+def ltv(game: str = Query("gi"), db: Session = Depends(get_db)):
+    from ...services.ltv import get_ltv
+    from ...services.datagen import END as DATA_END
+    g = _game(db, game)
+    if not g:
+        return {"error": "game not found"}
+    return {"game": game, **get_ltv(db, g, DATA_END)}
