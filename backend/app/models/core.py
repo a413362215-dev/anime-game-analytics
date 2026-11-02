@@ -207,6 +207,7 @@ class PlayerFeatureSnapshot(Base):
     recency_days = Column(Integer, default=0)
     frequency_30d = Column(Integer, default=0)
     monetary_30d = Column(Float, default=0)
+    orders_30d = Column(Integer, default=0)  # 近 30 天付费次数（F 的全量补强项）
     avg_session_min = Column(Float, default=0)
     level = Column(Integer, default=1)
     gacha_pulls_30d = Column(Integer, default=0)

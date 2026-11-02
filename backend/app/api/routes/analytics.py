@@ -228,3 +228,13 @@ def gacha(game: str = Query("gi"), db: Session = Depends(get_db)):
     return {"game": game, "version": {"code": ver.code, "title": ver.title},
             "kpis": kpis, "hist": {"buckets": buckets, "counts": hist},
             "pools": pools, "tops": tops}
+
+
+@router.get("/analytics/segments")
+def segments(game: str = Query("gi"), db: Session = Depends(get_db)):
+    from ...services.segmentation import get_segments
+    g = _game(db, game)
+    if not g:
+        return {"error": "game not found"}
+    out = get_segments(db, g.id)
+    return {"game": game, **out}

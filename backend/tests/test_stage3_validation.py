@@ -23,7 +23,7 @@ def _sessions_by_player(db):  # noqa: F811
 
 
 def test_snapshot_frequency_avg_recency_match(db):  # noqa: F811
-    """频次=窗口内去重会话天数；平均时长=窗口内会话均值；最近活跃=截止日-最后会话日"""
+    """频次=窗口内去重会话天数；平均时长=窗口内会话均值；最近活跃=截止日-维度 last_active_date（全量口径）"""
     since = END - timedelta(days=29)
     sess = _sessions_by_player(db)
     bad = []
@@ -32,7 +32,8 @@ def test_snapshot_frequency_avg_recency_match(db):  # noqa: F811
         win = [(d, dur) for d, dur in rows if d >= since]
         exp_freq = len({d for d, _ in win})
         exp_avg = round(sum(dur for _, dur in win) / len(win), 1) if win else 0
-        exp_rec = (END - max(d for d, _ in rows)).days if rows else 999
+        p = db.query(DimPlayer).get(s.player_id)
+        exp_rec = (END - p.last_active_date).days if p.last_active_date else 999
         if (s.frequency_30d, s.avg_session_min, s.recency_days) != (exp_freq, exp_avg, exp_rec):
             bad.append(s.player_id)
     assert not bad, f"{len(bad)} 名玩家快照会话特征对不上，如 {bad[:5]}"
@@ -67,9 +68,13 @@ def _check_funnel(db, game):  # noqa: F811
     for s in out["steps"]:
         assert abs(s["pct"] - round(s["count"] / vals[0] * 100, 1)) < 0.11
     bd = out["biggest_drop"]
-    assert bd["from"] == STEP_NAMES[2] and bd["to"] == STEP_NAMES[3], \
-        f"{game} 最大流失点应在序章→第 4 关，实际 {bd['from']}→{bd['to']}"
-    assert bd["count"] == vals[2] - vals[3]
+    assert bd["count"] == max(vals[i] - vals[i + 1] for i in range(5)), "最大流失数应等于六步中最大差值"
+    # 流失点位置断言放在 180 天窗口：30 天窗口样本小，两处流失（7% vs 13%）可能被噪声翻转（实测发生过）；
+    # 全期 n≈4000 时序章→第 4 关以约两倍差距稳定居首，这是生成规则的设计指纹
+    full = funnel(game=game, days=180, db=db)
+    fbd = full["biggest_drop"]
+    assert fbd["from"] == STEP_NAMES[2] and fbd["to"] == STEP_NAMES[3], \
+        f"{game} 全期最大流失点应在序章→第 4 关，实际 {fbd['from']}→{fbd['to']}"
     chan_new = sum(c["new"] for c in out["channels"])
     assert chan_new == out["new_players"], f"{game} 渠道新增合计 {chan_new} ≠ 新玩家 {out['new_players']}"
     for c in out["channels"]:

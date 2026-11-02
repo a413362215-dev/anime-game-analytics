@@ -138,11 +138,13 @@ def generate(db: Session) -> dict:
                 if x <= acc:
                     reg = d; break
             tier = _pick(gr, TIER_W)
+            lu = gr.random()
+            lifespan = gr.randint(1, 7) if lu < 0.30 else gr.randint(8, 30) if lu < 0.55 else gr.randint(31, 90) if lu < 0.75 else 10 ** 9
             players.append({
                 "game_id": gid, "external_uid": f"{880000000 + pi * 7 + gr.randint(0, 5)}",
                 "nickname": f"旅人{pi:04d}", "channel": _pick(gr, CHANNELS),
                 "register_date": reg, "level": 1, "payer_tier": tier,
-                "total_spend": 0.0, "last_active_date": None, "_tier": tier, "_reg": reg,
+                "total_spend": 0.0, "last_active_date": None, "_tier": tier, "_reg": reg, "_lifespan": lifespan,
                 "_active_days": [], "_spend": 0.0, "_pulls30": 0, "_sess": [],
             })
         db.bulk_insert_mappings(DimPlayer, [{k: v for k, v in p.items() if not k.startswith("_")} for p in players])
@@ -169,6 +171,8 @@ def generate(db: Session) -> dict:
                 if p["_reg"] > d:
                     continue
                 age = (d - p["_reg"]).days
+                if age > p["_lifespan"]:
+                    continue  # 已永久离站（流失），不再产生任何行为
                 if p["_reg"] == d:
                     new_u += 1
                     # 新手漏斗：注册当天走教程，逐步流失（第 4 关掉得最多，和漏斗页口径一致）

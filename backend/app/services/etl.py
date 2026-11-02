@@ -32,17 +32,22 @@ def run_feature_snapshot(db: Session, run_date) -> dict:
             sess_dur.setdefault(pid, []).append(dur or 0)
     money = dict(db.query(FactPayment.player_id, func.sum(FactPayment.amount))
                  .filter(FactPayment.pay_date >= since).group_by(FactPayment.player_id).all())
+    orders = dict(db.query(FactPayment.player_id, func.count(FactPayment.id))
+                  .filter(FactPayment.pay_date >= since).group_by(FactPayment.player_id).all())
     pulls = dict(db.query(FactGacha.player_id, func.count(FactGacha.id))
                  .filter(FactGacha.pull_date >= since).group_by(FactGacha.player_id).all())
     rows = []
     for p in players:
-        la = last_active.get(p.id)
+        # R（近度）取玩家维度的 last_active_date：这是全量口径；
+        # 若只用会话表，未被追踪的玩家会全部变成 999——阶段 5 分群前修正。
+        la = p.last_active_date or last_active.get(p.id)
         durs = sess_dur.get(p.id, [])
         rows.append({
             "game_id": p.game_id, "player_id": p.id, "run_date": run_date,
             "recency_days": (run_date - la).days if la else 999,
             "frequency_30d": len(sess_days.get(p.id, set())),
             "monetary_30d": round(money.get(p.id, 0) or 0, 2),
+            "orders_30d": orders.get(p.id, 0),
             "avg_session_min": round(sum(durs) / len(durs), 1) if durs else 0,
             "level": p.level or 1,
             "gacha_pulls_30d": pulls.get(p.id, 0),
